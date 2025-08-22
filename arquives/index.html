@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organograma Interativo - SEDUC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-top: 6px solid #c41e3a;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+      border-radius: 10px;
+      color: white;
+      margin: -20px -20px 30px -20px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .gov-badge {
+      display: inline-block;
+      background: white;
+      color: #c41e3a;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    #organogram {
+      width: 100%;
+      height: 700px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: auto;
+    }
+
+    .node-rect {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .node-rect:hover {
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+      transform: scale(1.05);
+    }
+
+    .node-text {
+      font-size: 13px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .link {
+      fill: none;
+      stroke: #c41e3a;
+      stroke-width: 3;
+      stroke-opacity: 0.8;
+    }
+
+    .info-icon {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: all;
+    }
+
+    .info-icon:hover {
+      transform: scale(1.2);
+    }
+
+    .info-text {
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 85vh;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #c41e3a, #8b0000);
+      color: white;
+      padding: 25px;
+      position: relative;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .close {
+      position: absolute;
+      right: 25px;
+      top: 25px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 0;
+      max-height: 65vh;
+      overflow: hidden;
+    }
+
+    /* Sistema de Abas */
+    .tabs-container {
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .tabs {
+      display: flex;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:first-child {
+      border-radius: 0;
+    }
+
+    .tab:last-child {
+      border-radius: 0;
+    }
+
+    .tab.active {
+      background: white;
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab:hover:not(.active) {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px;
+      max-height: 55vh;
+      overflow-y: auto;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content h3 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+
+    /* Estilo para artigos detalhados */
+    .article-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9ff;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .article-title {
+      font-weight: bold;
+      color: #667eea;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+
+    .article-content {
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .article-item {
+      margin-bottom: 12px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .article-item:before {
+      content: "▪";
+      color: #667eea;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+
+    .coming-soon {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .coming-soon .icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .competencia {
+      background: #f8f9ff;
+      border-left: 4px solid #667eea;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 0 10px 10px 0;
+      transition: all 0.3s ease;
+    }
+
+    .competencia:hover {
+      background: #f0f2ff;
+      transform: translateX(5px);
+    }
+
+    .competencia-number {
+      color: #667eea;
+      font-weight: bold;
+      display: inline-block;
+      min-width: 25px;
+    }
+
+    .reference {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #666;
+      border: 1px solid #e9ecef;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .header p {
+        font-size: 1rem;
+      }
+
+      #organogram {
+        height: 600px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        max-height: 90vh;
+      }
+
+      .modal-header {
+        padding: 20px;
+      }
+
+      .modal-header h2 {
+        font-size: 1.4rem;
+        padding-right: 50px;
+      }
+
+      .modal-body {
+        padding: 20px;
+        max-height: 70vh;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      #organogram {
+        height: 500px;
+      }
+
+      .modal-content {
+        margin: 5% auto;
+        max-height: 95vh;
+      }
+
+      .modal-header h2 {
+        font-size: 1.2rem;
+      }
+
+      .competencia {
+        padding: 12px 15px;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Organograma Interativo</h1>
+      <p>Clique nos botões para visualizar as competências de cada unidade</p>
+    </div>
+
+    <div id="organogram"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title"></h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="modal-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dados da estrutura hierárquica
+    const data = {
+      name: "Coordenadoria Geral de Suporte Administrativo (COGESPA)",
+      id: "main",
+      children: [
+        {
+          name: "Coordenadoria de Execução de Serviço (COEX)",
+          id: "execucao",
+          children: [
+            {
+              name: "Departamento de Gestão Documental (DPGDOC)",
+              id: "gestao"
+            },
+            {
+              name: "Divisão de Patrimônio (DPAT)",
+              id: "patrimonio"
+            },
+            {
+              name: "Divisão de Transportes (DTRAN)",
+              id: "transportes"
+            },
+            {
+              name: "Divisão de Zeladoria (DZEL)",
+              id: "zeladoria"
+            }
+          ]
+        },
+        {
+          name: "Coordenadoria de Programação de Serviço (COPROG)",
+          id: "programacao"
+        }
+      ]
+    };
+
+    // Função para verificar se é dispositivo móvel
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    // ====== CONFIGURAÇÕES DE ESPAÇAMENTO RESPONSIVO ======
+    function getResponsiveConfig() {
+      const isMobileDevice = isMobile();
+      return {
+        margin: isMobileDevice ? { top: 30, right: 20, bottom: 30, left: 20 } : { top: 50, right: 50, bottom: 50, left: 50 },
+        width: isMobileDevice ? Math.max(800, window.innerWidth * 1.5) : 1400,  // ← Largura total
+        height: isMobileDevice ? 500 : 600,  // ← Altura total
+        nodeSpacing: isMobileDevice ? 1.5 : 3  // ← ESPAÇAMENTO BASE (aumentar = mais espaço)
+        // Para mais espaço: mude para 4 ou 5
+        // Para menos espaço: mude para 2 ou 1.5
+      };
+    }
+
+    function createOrganogram() {
+      // Limpar SVG existente
+      d3.select("#organogram").selectAll("*").remove();
+
+      const config = getResponsiveConfig();
+      const { margin, width, height, nodeSpacing } = config;
+
+      // Criar SVG
+      const svg = d3.select("#organogram")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+      const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // ====== ALGORITMO DE ESPAÇAMENTO D3.js ======
+      const tree = d3.tree()
+        .size([width, height - 100])
+        .separation((a, b) => {
+          // ← AQUI você controla o espaçamento automático do D3
+          // a.parent === b.parent: nós do mesmo nível
+          // nodeSpacing: valor base de separação
+          return a.parent === b.parent ? nodeSpacing : nodeSpacing + 1;
+          // Para AUMENTAR espaçamento: mude para nodeSpacing * 2
+          // Para DIMINUIR espaçamento: mude para nodeSpacing * 0.5
+        });
+
+      const root = d3.hierarchy(data);
+      tree(root);
+
+      // ====== CONFIGURAÇÃO DE ESPAÇAMENTOS ======
+      // Posição do nó principal (Coordenadoria Geral)
+      root.x = width / 2;
+      root.y = 80;  // ← Distância do topo
+
+      if (root.children) {
+        // Posição das Coordenadorias (nível 2)
+        root.children[0].x = width * 0.25;  // ← Coordenadoria Execução (esquerda)
+        root.children[0].y = 250;           // ← Distância vertical do nível 1
+        root.children[1].x = width * 0.75;  // ← Coordenadoria Programação (direita)
+        root.children[1].y = 250;           // ← Mesma altura
+
+        // Posicionar filhos da Coordenadoria de Execução (nível 3)
+        if (root.children[0].children) {
+          const execChildren = root.children[0].children;
+          const totalWidth = width * 0.8;        // ← Largura total ocupada (80% da tela)
+          const spacing = totalWidth / (execChildren.length + 1);  // ← Espaçamento entre botões
+          const startX = width * 0.1;            // ← Margem esquerda (10% da tela)
+
+          execChildren.forEach((child, i) => {
+            child.x = startX + (i + 1) * spacing;  // ← Posição horizontal de cada botão
+            child.y = 450;                         // ← Distância vertical do nível 2
+          });
+        }
+      }
+
+      // Definir gradientes
+      const defs = svg.append("defs");
+
+      const gradientMain = defs.append("linearGradient")
+        .attr("id", "gradientMain")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientMain.append("stop").attr("offset", "0%").style("stop-color", "#667eea");
+      gradientMain.append("stop").attr("offset", "100%").style("stop-color", "#764ba2");
+
+      const gradientCoord = defs.append("linearGradient")
+        .attr("id", "gradientCoord")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientCoord.append("stop").attr("offset", "0%").style("stop-color", "#4facfe");
+      gradientCoord.append("stop").attr("offset", "100%").style("stop-color", "#00f2fe");
+
+      const gradientDept = defs.append("linearGradient")
+        .attr("id", "gradientDept")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientDept.append("stop").attr("offset", "0%").style("stop-color", "#fa709a");
+      gradientDept.append("stop").attr("offset", "100%").style("stop-color", "#fee140");
+
+      const gradientDiv = defs.append("linearGradient")
+        .attr("id", "gradientDiv")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientDiv.append("stop").attr("offset", "0%").style("stop-color", "#a8edea");
+      gradientDiv.append("stop").attr("offset", "100%").style("stop-color", "#fed6e3");
+
+      // Desenhar links (conexões)
+      const links = g.selectAll(".link")
+        .data(root.links())
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", d3.linkVertical()
+          .x(d => d.x)
+          .y(d => d.y));
+
+      // Função para determinar cor e tamanho baseado no tipo (cores oficiais SP)
+      function getNodeStyle(d) {
+        const isMobileDevice = isMobile();
+        const scale = isMobileDevice ? 0.8 : 1;
+
+        if (d.depth === 0) {
+          return {
+            fill: "url(#gradientMain)",
+            width: 320 * scale,
+            height: 70 * scale,
+            textColor: "white",
+            stroke: "#8b0000"
+          };
+        } else if (d.depth === 1) {
+          return {
+            fill: "url(#gradientCoord)",
+            width: 260 * scale,
+            height: 60 * scale,
+            textColor: "white",
+            stroke: "#2c2c2c"
+          };
+        } else {
+          const isDept = d.data.name.includes("Departamento");
+          return {
+            fill: isDept ? "url(#gradientDept)" : "url(#gradientDiv)",
+            width: 200 * scale,
+            height: 55 * scale,
+            textColor: isDept ? "white" : "#2c2c2c",
+            stroke: isDept ? "#c41e3a" : "#999"
+          };
+        }
+      }
+
+      // Criar grupos para os nós
+      const node = g.selectAll(".node")
+        .data(root.descendants())
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      // Adicionar retângulos clicáveis com bordas oficiais
+      node.append("rect")
+        .attr("class", "node-rect")
+        .attr("x", d => -getNodeStyle(d).width / 2)
+        .attr("y", d => -getNodeStyle(d).height / 2)
+        .attr("width", d => getNodeStyle(d).width)
+        .attr("height", d => getNodeStyle(d).height)
+        .attr("rx", 12)
+        .attr("ry", 12)
+        .style("fill", d => getNodeStyle(d).fill)
+        .style("stroke", d => getNodeStyle(d).stroke)
+        .style("stroke-width", 2)
+        .on("click", function (event, d) {
+          openModal(d.data.id);
+        });
+
+      // Adicionar texto
+      node.append("text")
+        .attr("class", "node-text")
+        .attr("dy", 0)
+        .style("fill", d => getNodeStyle(d).textColor)
+        .style("font-size", d => {
+          const baseSize = d.depth === 0 ? 14 : 12;
+          return isMobile() ? baseSize - 1 + "px" : baseSize + "px";
+        })
+        .each(function (d) {
+          const words = d.data.name.split(' ');
+          const lineHeight = 1.1;
+          const maxWidth = getNodeStyle(d).width - 40;
+
+          let line = [];
+          let lineNumber = 0;
+          const text = d3.select(this);
+
+          words.forEach(word => {
+            line.push(word);
+            const testLine = line.join(' ');
+
+            // Estimar largura do texto
+            if (testLine.length * 6 > maxWidth && line.length > 1) {
+              line.pop();
+              text.append("tspan")
+                .attr("x", 0)
+                .attr("dy", lineNumber === 0 ? -lineHeight * 0.3 + "em" : lineHeight + "em")
+                .text(line.join(' '));
+              line = [word];
+              lineNumber++;
+            }
+          });
+
+          text.append("tspan")
+            .attr("x", 0)
+            .attr("dy", lineNumber === 0 ? 0 : lineHeight + "em")
+            .text(line.join(' '));
+        });
+
+      // Adicionar ícone de informação com cores oficiais
+      node.append("circle")
+        .attr("class", "info-icon")
+        .attr("cx", d => getNodeStyle(d).width / 2 - 18)
+        .attr("cy", d => -getNodeStyle(d).height / 2 + 18)
+        .attr("r", isMobile() ? 8 : 10)
+        .style("fill", "#c41e3a")
+        .style("stroke", "white")
+        .style("stroke-width", 2)
+        .on("click", function (event, d) {
+          event.stopPropagation();
+          openModal(d.data.id);
+        });
+
+      node.append("text")
+        .attr("class", "info-text")
+        .attr("x", d => getNodeStyle(d).width / 2 - 18)
+        .attr("y", d => -getNodeStyle(d).height / 2 + 18)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("fill", "white")
+        .style("font-size", isMobile() ? "10px" : "12px")
+        .style("font-weight", "bold")
+        .text("ℹ");
+    }
+
+    // Dados das competências
+    const competencias = {
+      main: {
+        title: "Coordenadoria Geral de Suporte Administrativo",
+        summary: [
+          "Unidade responsável pela coordenação geral de todos os serviços de suporte administrativo da Secretaria de Educação",
+          "Supervisiona as atividades das coordenadorias subordinadas",
+          "Garante a integração e eficiência dos serviços administrativos",
+          "Promove a otimização de recursos e processos"
+        ],
+        articles: {
+          // Modelo para quando você adicionar as informações detalhadas
+          available: false,
+          sections: [
+            {
+              title: "Estrutura Organizacional",
+              content: "Informações detalhadas sobre a estrutura organizacional serão adicionadas aqui..."
+            },
+            {
+              title: "Competências Gerais",
+              content: "Detalhamento completo das competências gerais será inserido..."
+            }
+          ]
+        },
+        article: "Conforme estrutura organizacional da SEDUC"
+      },
+      programacao: {
+        title: "Coordenadoria de Programação de Serviço",
+        summary: [
+          "Elaborar planos, cronogramas e agendas para a contratação e execução de serviços de gestão documental, transporte administrativo, zeladoria e patrimônio, entre outros necessários ao funcionamento dos órgãos centrais da Pasta, garantindo a organização e o cumprimento de prazos",
+          "Alocar e gerenciar recursos humanos, materiais e financeiros de forma eficiente, otimizando o uso de cada um",
+          "Mapear, analisar e otimizar atividades de administração predial, buscando a eficiência e a redução de custos",
+          "Acompanhar a execução dos planos e programas, avaliando resultados e propondo melhorias, além de elaborar relatórios gerenciais",
+          "Gerir os serviços de limpeza das Unidades Regionais de Ensino"
+        ],
+        articles: {
+          available: true, // Exemplo de como ficará quando você adicionar
+          sections: [
+            {
+              title: "Artigo 118 - Competências da Coordenadoria",
+              content: [
+                "Elaborar planos, cronogramas e agendas para contratação e execução de serviços",
+                "Garantir organização e cumprimento de prazos dos órgãos centrais",
+                "Alocar e gerenciar recursos humanos, materiais e financeiros",
+                "Otimizar o uso de cada recurso disponível",
+                "Mapear, analisar e otimizar atividades de administração predial"
+              ]
+            },
+            {
+              title: "Subseção I - Planejamento e Execução",
+              content: [
+                "Desenvolver metodologias de planejamento estratégico",
+                "Estabelecer cronogramas de execução de serviços",
+                "Monitorar indicadores de performance",
+                "Propor melhorias contínuas nos processos"
+              ]
+            },
+            {
+              title: "Subseção II - Gestão de Recursos",
+              content: [
+                "Coordenar a alocação de recursos humanos",
+                "Gerenciar orçamentos e recursos financeiros",
+                "Supervisionar a utilização de materiais e equipamentos",
+                "Implementar controles de qualidade"
+              ]
+            }
+          ]
+        },
+        article: "Artigo 118"
+      },
+      execucao: {
+        title: "Coordenadoria de Execução de Serviço",
+        summary: [
+          "Coordenar e supervisionar as atividades do Departamento de Gestão Documental, Divisões de Transporte, Patrimônio e Zeladoria, garantindo a integração e a eficiência dos serviços de apoio administrativo",
+          "Planejar, executar e controlar os processos operacionais relacionados à gestão documental, transporte, patrimônio e zeladoria",
+          "Implementar e monitorar indicadores de desempenho para avaliar a qualidade e a eficiência dos serviços prestados",
+          "Planejar e executar a manutenção preventiva e corretiva de equipamentos, veículos e instalações prediais, garantindo a conservação do patrimônio e a segurança dos ambientes de trabalho",
+          "Zelar pela organização, controle e segurança dos documentos e bens patrimoniais, implementando procedimentos de gestão documental e patrimonial",
+          "Assegurar o cumprimento das normas e regulamentos relacionados à gestão documental, transporte, patrimônio e zeladoria"
+        ],
+        articles: {
+          available: false,
+          sections: [
+            {
+              title: "Artigo 119 - Competências da Coordenadoria",
+              content: "Informações detalhadas do Artigo 119 serão adicionadas..."
+            },
+            {
+              title: "Subseções Específicas",
+              content: "Detalhamento das subseções será inserido..."
+            }
+          ]
+        },
+        article: "Artigo 119"
+      },
+      gestao: {
+        title: "Departamento de Gestão Documental",
+        summary: [
+          "Apoiar o planejamento, normatização e execução dos serviços de gestão documental",
+          "Prestar serviços de classificação, organização e conservação de arquivos, fornecendo certidões e cópias de documentos arquivados nas unidades centrais da Secretaria",
+          "Gerenciar os sistemas de controle processual",
+          "Receber, protocolar, classificar, expedir e controlar a distribuição de processos",
+          "Informar e atualizar a localização de processos em trâmite",
+          "Providenciar, mediante autorização específica, vista de processos aos interessados",
+          "Organizar e viabilizar serviços de malotes, distribuição e entrega de correspondência da Rede"
+        ],
+        articles: {
+          available: false,
+          sections: [
+            {
+              title: "Artigo 120 - Competências do Departamento",
+              content: "Informações detalhadas do Artigo 120 serão adicionadas..."
+            }
+          ]
+        },
+        article: "Artigo 120"
+      },
+      zeladoria: {
+        title: "Divisão de Zeladoria",
+        summary: [
+          "Executar e organizar eventos internos e externos junto aos Demandantes",
+          "Zelar pela organização e manutenção dos prédios administrativos e das Unidades Regionais de Ensino",
+          "Gerenciar e fiscalizar serviços preventivos e corretivos nos prédios",
+          "Propor a especificação e quantitativos de materiais e equipamentos que atendem a Pasta e providenciar sua aquisição",
+          "Propor a especificação e quantitativo para contratação de serviços terceirizados que atendem a Pasta"
+        ],
+        articles: {
+          available: false,
+          sections: [
+            {
+              title: "Artigo 121 - Competências da Divisão",
+              content: "Informações detalhadas do Artigo 121 serão adicionadas..."
+            }
+          ]
+        },
+        article: "Artigo 121"
+      },
+      patrimonio: {
+        title: "Divisão de Patrimônio",
+        summary: [
+          "Acompanhar por meio de sistema informatizado a depreciação de bens patrimoniais da Secretaria e sugerir às demais unidades da Pasta o momento de sua renovação",
+          "Administrar e controlar bens patrimoniais utilizando-se de cadastro, formas de identificação, inventário periódico e baixa patrimonial",
+          "Providenciar seguro de bens patrimoniais móveis e imóveis e promover outras medidas necessárias à sua defesa e preservação",
+          "Efetuar o arrolamento de bens inservíveis e sua baixa patrimonial",
+          "Orientar as demais áreas da Pasta na gestão de seus bens patrimoniais",
+          "Apoiar à Assessoria Técnica das Unidades Regionais de Ensino e o Serviço de Obras e Manutenção Escolar na regularização documental dos imóveis sob sua administração",
+          "Fiscalizar, orientar e apoiar as demais unidades da Pasta para que mantenham as fichas dos imóveis sob sua administração atualizadas perante o Sistema de Gerenciamento de Imóveis – SGI",
+          "Gerir o controle de materiais: exercendo atividades relativas a recebimento, conferência, guarda, distribuição e controle de materiais, para atendimento de unidades centrais da Secretaria, localizadas fora do seu edifício sede"
+        ],
+        articles: {
+          available: false,
+          sections: [
+            {
+              title: "Artigo 122 - Competências da Divisão",
+              content: "Informações detalhadas do Artigo 122 serão adicionadas..."
+            }
+          ]
+        },
+        article: "Artigo 122"
+      },
+      transportes: {
+        title: "Divisão de Transportes",
+        summary: [
+          "No âmbito da Secretaria, as previstas no artigo 7º do Decreto nº 9.543, de 1º de março de 1977",
+          "Em relação às unidades centrais da Secretaria: executar as previstas nos artigos 8º e 9º do Decreto nº 9.543, de 1º de março de 1977",
+          "Propor a especificação das contratações de serviços e aquisições de veículos",
+          "Planejar o custo e o uso da frota e de serviços motorizados",
+          "Em relação à cessão de veículos às Prefeituras: regularizar a documentação e efetuar a entrega física dos veículos oficiais",
+          "Redigir os termos de cessão de uso dos veículos cedidos às Prefeituras",
+          "Apoiar às Unidades Regionais de Ensino na aplicação das obrigações contratuais estabelecidas nos convênios junto às Prefeituras, referente a débitos veiculares",
+          "Instruir processo de doação permanente dos veículos quando determinado pelo Gabinete"
+        ],
+        articles: {
+          available: false,
+          sections: [
+            {
+              title: "Artigo 123 - Competências da Divisão",
+              content: "Informações detalhadas do Artigo 123 serão adicionadas..."
+            }
+          ]
+        },
+        article: "Artigo 123"
+      }
+    };
+
+    function openModal(type) {
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalContent = document.getElementById('modal-content');
+
+      const data = competencias[type];
+
+      modalTitle.textContent = data.title;
+
+      // Criar estrutura com abas
+      let contentHTML = `
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab(event, 'summary')">
+                            📋 Resumo Executivo
+                        </button>
+                        <button class="tab" onclick="switchTab(event, 'articles')">
+                            📖 Artigos Detalhados
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="summary" class="tab-content active">
+                    <h3>Competências Principais</h3>
+            `;
+
+      // Aba 1: Resumo (competências atuais)
+      data.summary.forEach((competencia, index) => {
+        contentHTML += `
+                    <div class="competencia">
+                        <span class="competencia-number">${index + 1}.</span>
+                        ${competencia}
+                    </div>
+                `;
+      });
+
+      contentHTML += `
+                    <div class="reference">
+                        <strong>Base Legal:</strong> ${data.article}<br>
+                        <strong>Fonte:</strong> Resolução SEDUC-SP nº 108, de 28 de julho de 2025
+                    </div>
+                </div>
+                
+                <div id="articles" class="tab-content">
+            `;
+
+      // Aba 2: Artigos Detalhados
+      if (data.articles.available) {
+        contentHTML += '<h3>Artigos e Subseções Detalhadas</h3>';
+        data.articles.sections.forEach(section => {
+          contentHTML += `
+                        <div class="article-section">
+                            <div class="article-title">${section.title}</div>
+                            <div class="article-content">
+                    `;
+
+          if (Array.isArray(section.content)) {
+            section.content.forEach(item => {
+              contentHTML += `<div class="article-item">${item}</div>`;
+            });
+          } else {
+            contentHTML += `<div class="article-item">${section.content}</div>`;
+          }
+
+          contentHTML += `
+                            </div>
+                        </div>
+                    `;
+        });
+      } else {
+        contentHTML += `
+                    <div class="coming-soon">
+                        <div class="icon">📄</div>
+                        <h3>Artigos Detalhados</h3>
+                        <p>As informações detalhadas dos artigos e subseções<br>
+                        serão adicionadas em breve.</p>
+                        <br>
+                        <p><strong>Base Legal:</strong> ${data.article}</p>
+                    </div>
+                `;
+      }
+
+      contentHTML += '</div>';
+
+      modalContent.innerHTML = contentHTML;
+      modal.style.display = 'block';
+    }
+
+    function switchTab(event, tabName) {
+      // Remover classe active de todas as abas
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // Adicionar classe active na aba clicada
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      modal.style.display = 'none';
+    }
+
+    // Fechar modal clicando fora dele
+    window.onclick = function (event) {
+      const modal = document.getElementById('modal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Criar organograma inicial
+    createOrganogram();
+
+    // Recriar organograma quando a tela for redimensionada
+    window.addEventListener('resize', function () {
+      createOrganogram();
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organograma Interativo - SEDUC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Organograma Interativo</h1>
+      <p>Clique nos botões para visualizar as competências de cada unidade</p>
+      <div class="gov-badge">🏛️ SEDUC-SP</div>
+    </div>
+
+    <div id="organogram"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="infoModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title"></h2>
+        <span class="close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="tabs-container">
+          <div class="tabs">
+            <button class="tab active" data-tab="resumo">RESOLUÇÃO SEDUC N° 108, DE 28 DE JULHO DE 2025</button>
+            <button class="tab" data-tab="detalhes">DETALHAMENTO DAS ATRIBUIÇÕES</button>
+          </div>
+        </div>
+        <div id="resumo" class="tab-content active"></div>
+        <div id="detalhes" class="tab-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+
+</html>

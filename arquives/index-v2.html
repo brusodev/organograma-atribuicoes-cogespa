@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organograma Interativo - SEDUC</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-top: 6px solid #c41e3a;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+      border-radius: 10px;
+      color: white;
+      margin: -20px -20px 30px -20px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .gov-badge {
+      display: inline-block;
+      background: white;
+      color: #c41e3a;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    #organogram {
+      width: 100%;
+      height: 700px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: auto;
+    }
+
+    .node-rect {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .node-rect:hover {
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+      transform: scale(1.05);
+    }
+
+    .node-text {
+      font-size: 13px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+    }
+
+    .link {
+      fill: none;
+      stroke: #c41e3a;
+      stroke-width: 3;
+      stroke-opacity: 0.8;
+    }
+
+    .info-icon {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: all;
+    }
+
+    .info-icon:hover {
+      transform: scale(1.2);
+    }
+
+    .info-text {
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 85vh;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #c41e3a, #8b0000);
+      color: white;
+      padding: 25px;
+      position: relative;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .close {
+      position: absolute;
+      right: 25px;
+      top: 25px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 0;
+      max-height: 65vh;
+      overflow: hidden;
+    }
+
+    /* Sistema de Abas */
+    .tabs-container {
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .tabs {
+      display: flex;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:first-child {
+      border-radius: 0;
+    }
+
+    .tab:last-child {
+      border-radius: 0;
+    }
+
+    .tab.active {
+      background: white;
+      color: #c41e3a;
+      border-bottom-color: #c41e3a;
+    }
+
+    .tab:hover:not(.active) {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px;
+      max-height: 55vh;
+      overflow-y: auto;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content h3 {
+      color: #c41e3a;
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+
+    /* Estilo para artigos detalhados */
+    .article-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid #c41e3a;
+    }
+
+    .article-section-full {
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid #c41e3a;
+    }
+
+    .article-section-full h4 {
+      color: #c41e3a;
+      font-size: 1.1rem;
+      margin: 20px 0 10px 0;
+      font-weight: bold;
+    }
+
+    .article-section-full p {
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+
+    .article-title {
+      font-weight: bold;
+      color: #c41e3a;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+
+    .article-content {
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .article-item {
+      margin-bottom: 12px;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .article-item:before {
+      content: "▪";
+      color: #c41e3a;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+
+    .coming-soon {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .coming-soon .icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .competencia {
+      background: #f8f9fa;
+      border-left: 4px solid #c41e3a;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 0 10px 10px 0;
+      transition: all 0.3s ease;
+    }
+
+    .competencia:hover {
+      background: #f0f0f0;
+      transform: translateX(5px);
+    }
+
+    .competencia-number {
+      color: #c41e3a;
+      font-weight: bold;
+      display: inline-block;
+      min-width: 25px;
+    }
+
+    .reference {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #666;
+      border: 1px solid #e9ecef;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .header p {
+        font-size: 1rem;
+      }
+
+      #organogram {
+        height: 600px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        max-height: 90vh;
+      }
+
+      .modal-header {
+        padding: 20px;
+      }
+
+      .modal-header h2 {
+        font-size: 1.4rem;
+        padding-right: 50px;
+      }
+
+      .modal-body {
+        padding: 20px;
+        max-height: 70vh;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      #organogram {
+        height: 500px;
+      }
+
+      .modal-content {
+        margin: 5% auto;
+        max-height: 95vh;
+      }
+
+      .modal-header h2 {
+        font-size: 1.2rem;
+      }
+
+      .competencia {
+        padding: 12px 15px;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Organograma Interativo</h1>
+      <p>Clique nos botões para visualizar as competências de cada unidade</p>
+      <div class="gov-badge">🏛️ Governo do Estado de São Paulo</div>
+    </div>
+
+    <div id="organogram"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title"></h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="modal-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dados da estrutura hierárquica com siglas oficiais
+    const data = {
+      name: "Coordenadoria Geral de Suporte Administrativo (COGESPA)",
+      id: "main",
+      children: [
+        {
+          name: "Coordenadoria de Execução de Serviço (COEX)",
+          id: "execucao",
+          children: [
+            {
+              name: "Departamento de Gestão Documental (DPGDOC)",
+              id: "gestao"
+            },
+            {
+              name: "Divisão de Patrimônio (DPAT)",
+              id: "patrimonio"
+            },
+            {
+              name: "Divisão de Transportes (DTRAN)",
+              id: "transportes"
+            },
+            {
+              name: "Divisão de Zeladoria (DZEL)",
+              id: "zeladoria"
+            }
+          ]
+        },
+        {
+          name: "Coordenadoria de Programação de Serviço (COPROG)",
+          id: "programacao"
+        }
+      ]
+    };
+
+    // Função para verificar se é dispositivo móvel
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    // Configurações responsivas
+    function getResponsiveConfig() {
+      const isMobileDevice = isMobile();
+      return {
+        margin: isMobileDevice ? { top: 30, right: 20, bottom: 30, left: 20 } : { top: 50, right: 50, bottom: 50, left: 50 },
+        width: isMobileDevice ? Math.max(800, window.innerWidth * 1.5) : 1400,
+        height: isMobileDevice ? 500 : 600,
+        nodeSpacing: isMobileDevice ? 1.5 : 3
+      };
+    }
+
+    function createOrganogram() {
+      // Limpar SVG existente
+      d3.select("#organogram").selectAll("*").remove();
+
+      const config = getResponsiveConfig();
+      const { margin, width, height, nodeSpacing } = config;
+
+      // Criar SVG
+      const svg = d3.select("#organogram")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+      const g = svg.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // Criar árvore hierárquica
+      const tree = d3.tree()
+        .size([width, height - 100])
+        .separation((a, b) => {
+          return a.parent === b.parent ? nodeSpacing : nodeSpacing + 1;
+        });
+
+      const root = d3.hierarchy(data);
+      tree(root);
+
+      // Ajustar posicionamento manual para melhor layout com mais espaçamento
+      root.x = width / 2;
+      root.y = 80;
+
+      if (root.children) {
+        root.children[0].x = width * 0.25;
+        root.children[0].y = 250;
+        root.children[1].x = width * 0.75;
+        root.children[1].y = 250;
+
+        // Posicionar filhos da Coordenadoria de Execução com mais espaçamento
+        if (root.children[0].children) {
+          const execChildren = root.children[0].children;
+          const totalWidth = width * 0.8;
+          const spacing = totalWidth / (execChildren.length + 1);
+          const startX = width * 0.1;
+
+          execChildren.forEach((child, i) => {
+            child.x = startX + (i + 1) * spacing;
+            child.y = 450;
+          });
+        }
+      }
+
+      // Definir gradientes com cores oficiais do Governo de SP
+      const defs = svg.append("defs");
+
+      // Gradiente principal - Vermelho oficial SP
+      const gradientMain = defs.append("linearGradient")
+        .attr("id", "gradientMain")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientMain.append("stop").attr("offset", "0%").style("stop-color", "#c41e3a");
+      gradientMain.append("stop").attr("offset", "100%").style("stop-color", "#8b0000");
+
+      // Gradiente coordenadorias - Preto e cinza
+      const gradientCoord = defs.append("linearGradient")
+        .attr("id", "gradientCoord")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientCoord.append("stop").attr("offset", "0%").style("stop-color", "#2c2c2c");
+      gradientCoord.append("stop").attr("offset", "100%").style("stop-color", "#4a4a4a");
+
+      // Gradiente departamento - Vermelho mais claro
+      const gradientDept = defs.append("linearGradient")
+        .attr("id", "gradientDept")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientDept.append("stop").attr("offset", "0%").style("stop-color", "#e53e3e");
+      gradientDept.append("stop").attr("offset", "100%").style("stop-color", "#c41e3a");
+
+      // Gradiente divisões - Cinza claro
+      const gradientDiv = defs.append("linearGradient")
+        .attr("id", "gradientDiv")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "100%");
+      gradientDiv.append("stop").attr("offset", "0%").style("stop-color", "#f7f7f7");
+      gradientDiv.append("stop").attr("offset", "100%").style("stop-color", "#e2e2e2");
+
+      // Desenhar links (conexões)
+      const links = g.selectAll(".link")
+        .data(root.links())
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", d3.linkVertical()
+          .x(d => d.x)
+          .y(d => d.y));
+
+      // Função para determinar cor e tamanho baseado no tipo (cores oficiais SP)
+      function getNodeStyle(d) {
+        const isMobileDevice = isMobile();
+        const scale = isMobileDevice ? 0.8 : 1;
+
+        if (d.depth === 0) {
+          return {
+            fill: "url(#gradientMain)",
+            width: 320 * scale,
+            height: 70 * scale,
+            textColor: "white",
+            stroke: "#8b0000"
+          };
+        } else if (d.depth === 1) {
+          return {
+            fill: "url(#gradientCoord)",
+            width: 260 * scale,
+            height: 60 * scale,
+            textColor: "white",
+            stroke: "#2c2c2c"
+          };
+        } else {
+          const isDept = d.data.name.includes("Departamento");
+          return {
+            fill: isDept ? "url(#gradientDept)" : "url(#gradientDiv)",
+            width: 200 * scale,
+            height: 55 * scale,
+            textColor: isDept ? "white" : "#2c2c2c",
+            stroke: isDept ? "#c41e3a" : "#999"
+          };
+        }
+      }
+
+      // Criar grupos para os nós
+      const node = g.selectAll(".node")
+        .data(root.descendants())
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      // Adicionar retângulos clicáveis com bordas oficiais
+      node.append("rect")
+        .attr("class", "node-rect")
+        .attr("x", d => -getNodeStyle(d).width / 2)
+        .attr("y", d => -getNodeStyle(d).height / 2)
+        .attr("width", d => getNodeStyle(d).width)
+        .attr("height", d => getNodeStyle(d).height)
+        .attr("rx", 12)
+        .attr("ry", 12)
+        .style("fill", d => getNodeStyle(d).fill)
+        .style("stroke", d => getNodeStyle(d).stroke)
+        .style("stroke-width", 2)
+        .on("click", function (event, d) {
+          openModal(d.data.id);
+        });
+
+      // Adicionar texto
+      node.append("text")
+        .attr("class", "node-text")
+        .attr("dy", 0)
+        .style("fill", d => getNodeStyle(d).textColor)
+        .style("font-size", d => {
+          const baseSize = d.depth === 0 ? 14 : 12;
+          return isMobile() ? baseSize - 1 + "px" : baseSize + "px";
+        })
+        .each(function (d) {
+          const words = d.data.name.split(' ');
+          const lineHeight = 1.1;
+          const maxWidth = getNodeStyle(d).width - 40;
+
+          let line = [];
+          let lineNumber = 0;
+          const text = d3.select(this);
+
+          words.forEach(word => {
+            line.push(word);
+            const testLine = line.join(' ');
+
+            // Estimar largura do texto
+            if (testLine.length * 6 > maxWidth && line.length > 1) {
+              line.pop();
+              text.append("tspan")
+                .attr("x", 0)
+                .attr("dy", lineNumber === 0 ? -lineHeight * 0.3 + "em" : lineHeight + "em")
+                .text(line.join(' '));
+              line = [word];
+              lineNumber++;
+            }
+          });
+
+          text.append("tspan")
+            .attr("x", 0)
+            .attr("dy", lineNumber === 0 ? 0 : lineHeight + "em")
+            .text(line.join(' '));
+        });
+
+      // Adicionar ícone de informação com cores oficiais
+      node.append("circle")
+        .attr("class", "info-icon")
+        .attr("cx", d => getNodeStyle(d).width / 2 - 18)
+        .attr("cy", d => -getNodeStyle(d).height / 2 + 18)
+        .attr("r", isMobile() ? 8 : 10)
+        .style("fill", "#c41e3a")
+        .style("stroke", "white")
+        .style("stroke-width", 2)
+        .on("click", function (event, d) {
+          event.stopPropagation();
+          openModal(d.data.id);
+        });
+
+      node.append("text")
+        .attr("class", "info-text")
+        .attr("x", d => getNodeStyle(d).width / 2 - 18)
+        .attr("y", d => -getNodeStyle(d).height / 2 + 18)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .style("fill", "white")
+        .style("font-size", isMobile() ? "10px" : "12px")
+        .style("font-weight", "bold")
+        .text("ℹ");
+    }
+
+    // ====== INFORMAÇÕES DETALHADAS COMPLETAS ======
+    const competencias = {
+      main: {
+        title: "Coordenadoria Geral de Suporte Administrativo",
+        summary: [
+          "Unidade responsável pela coordenação geral de todos os serviços de suporte administrativo da Secretaria de Educação",
+          "Supervisiona as atividades das coordenadorias subordinadas",
+          "Garante a integração e eficiência dos serviços administrativos",
+          "Promove a otimização de recursos e processos"
+        ],
+        articles: {
+          available: true,
+          title: "Coordenadoria Geral de Suporte Administrativo – COGESPA",
+          sections: [
+            {
+              title: "Estrutura Organizacional",
+              content: [
+                "Coordena as atividades da Coordenadoria de Programação de Serviços (COPROG)",
+                "Supervisiona a Coordenadoria de Execução de Serviços (COEX)",
+                "Gerencia o Departamento de Gestão Documental (DPGDOC)",
+                "Administra as Divisões de Patrimônio, Transportes e Zeladoria"
+              ]
+            },
+            {
+              title: "Competências Gerais",
+              content: [
+                "Estabelecer diretrizes para o funcionamento dos órgãos centrais da Pasta",
+                "Coordenar a integração entre as unidades subordinadas",
+                "Promover a eficiência dos serviços de apoio administrativo",
+                "Garantir o cumprimento das normas e regulamentos da Secretaria"
+              ]
+            }
+          ]
+        },
+        article: "Conforme estrutura organizacional da SEDUC"
+      },
+      programacao: {
+        title: "Coordenadoria de Programação de Serviço",
+        summary: [
+          "Elaborar planos, cronogramas e agendas para a contratação e execução de serviços de gestão documental, transporte administrativo, zeladoria e patrimônio",
+          "Alocar e gerenciar recursos humanos, materiais e financeiros de forma eficiente",
+          "Mapear, analisar e otimizar atividades de administração predial",
+          "Acompanhar a execução dos planos e programas, avaliando resultados",
+          "Gerir os serviços de limpeza das Unidades Regionais de Ensino"
+        ],
+        articles: {
+          available: true,
+          title: "Coordenadoria de Programação de Serviços – COPROG",
+          content: `
+                        <p><strong>A COPROG possui as seguintes atribuições:</strong></p>
+                        
+                        <div class="article-item">Fornecer orientações jurídicas ao Departamento e às Divisões, elaborar justificativas e descrever objetos ou serviços para novas contratações, bem como realizar pesquisas de itens de materiais de consumo ou permanentes para os Prédios Administrativos;</div>
+                        
+                        <div class="article-item">Acompanhar e fiscalizar a legislação, sindicatos, sanções e multas; elaborar termos de referência, notificações e ofícios; analisar a viabilidade de novas contratações; e fornecer orientações para o Sistema de Cadastro de Serviços Terceirizados da Corregedoria, incluindo cadastro de contratos contínuos a partir da assinatura e, mensalmente, informar pagamentos e reajustes;</div>
+                        
+                        <h4><strong>Gestão da Vida Funcional dos Servidores</strong></h4>
+                        
+                        <div class="article-item">Gerenciar procedimentos para nomeação de novos servidores, orientação e conferência de documentos, registro de alocação em caso de mudança de cargo e registro de servidores novos no sistema Secretaria Escolar Digital (SED);</div>
+                        
+                        <div class="article-item">Controlar frequência de servidores, folhas de ponto, assinaturas de entrada e saída, férias, faltas justificadas e injustificadas, licenças médicas, licença prêmio, afastamentos e demais ocorrências funcionais;</div>
+                        
+                        <div class="article-item">Atualizar mensalmente férias no sistema SED;</div>
+                        
+                        <div class="article-item">Encaminhar atestados médicos e requerimentos de licença saúde/auxílio-doença ao Recursos Humanos;</div>
+                        
+                        <div class="article-item">Elaborar memorandos de substituição e gratificação;</div>
+                        
+                        <div class="article-item">Revisar mensalmente as folhas de frequência e enviá-las ao RH;</div>
+                        
+                        <div class="article-item">Realizar reuniões semanais com diretores para repassar orientações relativas aos servidores;</div>
+                        
+                        <div class="article-item">Acompanhar publicações no Diário Oficial do Estado (D.O.E.) sobre decretos, licenças, afastamentos e pedidos de aposentadoria, registrando nas folhas de frequência.</div>
+                        
+                        <h4><strong>Contato com Órgãos Fiscalizadores</strong></h4>
+                        
+                        <div class="article-item"><strong>Sistema de Consolidação da Informação ao Tribunal de Contas (SCT):</strong> Alimentação mensal com informações de licitações homologadas e contratos vigentes;</div>
+                        
+                        <div class="article-item"><strong>Sistema de Auditoria Eletrônica do Tribunal de Contas (AUDESP):</strong> Alimentação mensal com informações de licitações homologadas e contratos vigentes;</div>
+                        
+                        <div class="article-item"><strong>Sistema de Contas Estaduais do Tribunal de Contas (SISCOE):</strong> Atualização anual dos dados cadastrais das autoridades da pasta e envio do relatório de atividades desenvolvido pelo Gabinete do Secretário e assessorias no ano anterior.</div>
+                        
+                        <h4><strong>Planejamento Financeiro e Gerenciamento Orçamentário</strong></h4>
+                        
+                        <div class="article-item">Gerenciar recursos financeiros da COGESPA e acompanhar os recursos do Gabinete do Secretário;</div>
+                        
+                        <div class="article-item">Realizar reuniões periódicas com a área financeira, elaborar planilhas financeiras, comunicados, analisar disponibilidade orçamentária para novas contratações, cancelamentos e remanejamentos;</div>
+                        
+                        <div class="article-item">Suportar e analisar pagamentos de contratos contínuos junto aos centros de custo.</div>
+                        
+                        <h4><strong>Publicações no Diário Oficial</strong></h4>
+                        
+                        <div class="article-item">Receber atos a serem publicados via sistema Sem Papel ou Outlook, preparar laudas e enviar à PRODESP para publicação;</div>
+                        
+                        <div class="article-item">Realizar conferência no Diário Oficial no dia seguinte, inserir cópias nos processos e enviar à área demandante.</div>
+                        
+                        <h4><strong>Apuração Preliminar</strong></h4>
+                        
+                        <div class="article-item">Participar de apurações preliminares para identificar ou confirmar a ocorrência de ilícito administrativo, incluindo análise de processos, oitivas com servidores envolvidos e reuniões com demais participantes.</div>
+                        
+                        <h4><strong>Gestão de Contratos Administrativos (37 contratos)</strong></h4>
+                        
+                        <div class="article-item"><strong>Publicidade Governamental:</strong> Gerenciamento processual, reservas, empenhos, pagamentos e cancelamentos de saldo;</div>
+                        
+                        <div class="article-item"><strong>Foto, Vídeo e Filmagem:</strong> Fiscalização, administração de pagamentos, aditamentos contratuais, reajustes, ordens de serviço e acompanhamento da execução;</div>
+                        
+                        <div class="article-item"><strong>Certificação Digital:</strong> Autuação de processos, pesquisa de mercado, solicitação de autorização junto ao COETIC, reserva, empenho e pagamentos de notas fiscais;</div>
+                        
+                        <div class="article-item"><strong>Passagens Aéreas:</strong> Pesquisa de voos nacionais e internacionais, emissão de bilhetes, seguro viagem, controle de orçamento, cancelamentos, pagamento e informação ao site da transparência;</div>
+                        
+                        <div class="article-item"><strong>Seguro Veicular:</strong> Acompanhamento de franquia, solicitação de guincho, pagamento de franquias, reservas, empenhos e pagamentos;</div>
+                        
+                        <div class="article-item"><strong>Manutenção de Serviços:</strong> Reajustes contratuais, execução de aditamentos, verificação da convenção coletiva, pagamentos de salários e benefícios; controle de pagamentos mensais, reservas, empenhos e cancelamentos de saldo.</div>
+                        
+                        <p>Os serviços gerenciados incluem manutenção predial, recepção, vigilância patrimonial, bombeiros, manobristas, locação de veículos com e sem condutor, placas de inauguração, controle de pragas, purificadores, abastecimento de combustíveis e manutenção de veículos oficiais.</p>
+                    `
+        },
+        article: "Artigo 118"
+      },
+      execucao: {
+        title: "Coordenadoria de Execução de Serviço",
+        summary: [
+          "Coordenar e supervisionar as atividades do Departamento de Gestão Documental e Divisões",
+          "Planejar, executar e controlar os processos operacionais",
+          "Implementar e monitorar indicadores de desempenho",
+          "Planejar e executar a manutenção preventiva e corretiva",
+          "Zelar pela organização, controle e segurança dos documentos",
+          "Assegurar o cumprimento das normas e regulamentos"
+        ],
+        articles: {
+          available: true,
+          title: "Coordenadoria de Execução de Serviços – COEX",
+          sections: [
+            {
+              title: "Criação e Função da COEX",
+              content: [
+                "Criada na reestruturação de 2025",
+                "Prestar suporte técnico especializado aos departamentos e divisões",
+                "Assegurar condições adequadas para execução das atividades administrativas e operacionais"
+              ]
+            },
+            {
+              title: "Suporte Técnico e Planejamento",
+              content: [
+                "Apoiar a elaboração, acompanhamento e atualização do planejamento estratégico, tático e operacional",
+                "Realizar reuniões periódicas de alinhamento com cada unidade organizacional",
+                "Integrar as áreas, otimizar recursos e monitorar resultados",
+                "Analisar demandas e definir prioridades",
+                "Gerir processos e fluxos de trabalho, reduzindo retrabalhos e gargalos",
+                "Oferecer apoio metodológico na implementação de projetos",
+                "Monitorar metas e elaborar relatórios de desempenho"
+              ]
+            },
+            {
+              title: "Gestão de Diárias",
+              content: [
+                "Analisar solicitações de diárias no Sistema Secretaria Escolar Digital (SED)",
+                "Verificar anexos, viagens realizadas e utilização de veículos oficiais",
+                "Montar processos completos para pagamento, incluindo recibos, publicações, notas de empenho",
+                "Verificar glosas e autorizações, com envio ao Diário Oficial conforme Decreto nº 48.292/2003"
+              ]
+            },
+            {
+              title: "Gestão de Eventos",
+              content: [
+                "Planejar, organizar e acompanhar eventos institucionais, após autorização da Chefia de Gabinete",
+                "Coordenar reuniões com áreas demandantes e empresas responsáveis pela execução",
+                "Solicitar apoio de órgãos externos, como CET, SABESP e infraestrutura",
+                "Gerir hospedagem, alimentação, transporte, execução, controle de itens",
+                "Mobilizar servidores de todos os centros do Departamento de Administração para apoio logístico"
+              ]
+            }
+          ]
+        },
+        article: "Artigo 119"
+      },
+      gestao: {
+        title: "Departamento de Gestão Documental",
+        summary: [
+          "Apoiar o planejamento, normatização e execução dos serviços de gestão documental",
+          "Prestar serviços de classificação, organização e conservação de arquivos",
+          "Gerenciar os sistemas de controle processual",
+          "Receber, protocolar, classificar, expedir e controlar a distribuição de processos",
+          "Informar e atualizar a localização de processos em trâmite",
+          "Providenciar vista de processos aos interessados",
+          "Organizar serviços de malotes e correspondência"
+        ],
+        articles: {
+          available: true,
+          title: "Departamento de Gestão Documental – DPGDOC",
+          sections: [
+            {
+              title: "Sistemas de Gestão Documental",
+              content: [
+                "NCPB: Sistema iniciado na década de 1990, encerrado para cadastro em 2018, ainda vigente para consulta",
+                "SPDOC: Finalizado para cadastro de documentos vigentes em 2019",
+                "SPSP (São Paulo Sem Papel): Sistema finalizado em 2023, utilizado para consulta",
+                "SEI (Sistema Eletrônico de Informações): Sistema vigente, utilizado para tramitação e gestão de processos eletrônicos"
+              ]
+            },
+            {
+              title: "Suporte e Orientação",
+              content: [
+                "Orientação às 91 Diretorias de Ensino e órgãos centrais quanto à aplicação da gestão documental",
+                "Atendimento às normas e procedimentos de protocolo, conforme Manual de Normas e Procedimentos",
+                "Interlocução com o Serviço de Informação ao Cidadão (SIC) do Departamento de Administração",
+                "Execução das atividades da Comissão de Avaliação de Documentos e Acesso (CADA)",
+                "Orientação por e-mail, telefone, WhatsApp e visitas presenciais"
+              ]
+            },
+            {
+              title: "Grupo de Trabalho Protocolo e Malote – SEDE",
+              content: [
+                "Receber, protocolar, cadastrar e encaminhar expedientes e processos da Secretaria",
+                "Pesquisar documentos e acompanhar andamento de processos disciplinares",
+                "Conferir páginas de processos recebidos de outras secretarias e procuradorias",
+                "Separar, organizar e viabilizar serviços de malotes entre órgãos centrais e 91 Diretorias",
+                "Gerenciar quantitativo de 1.630 sacolas de malote entre entrada e saída"
+              ]
+            },
+            {
+              title: "Grupo de Trabalho Arquivo – Prédio Armênia",
+              content: [
+                "Arquivamento e desarquivamento de processos físicos",
+                "Organização e classificação de documentos arquivados",
+                "Triagem de documentos com prazo de guarda cumprido",
+                "Custódia do legado documental de unidades extintas (CEI, COGSP, CENP, DSE)"
+              ]
+            }
+          ]
+        },
+        article: "Artigo 120"
+      },
+      patrimonio: {
+        title: "Divisão de Patrimônio",
+        summary: [
+          "Acompanhar a depreciação de bens patrimoniais da Secretaria",
+          "Administrar e controlar bens patrimoniais",
+          "Providenciar seguro de bens patrimoniais móveis e imóveis",
+          "Efetuar o arrolamento de bens inservíveis",
+          "Orientar as demais áreas na gestão de bens patrimoniais",
+          "Apoiar na regularização documental dos imóveis",
+          "Fiscalizar e orientar a atualização do SGI",
+          "Gerir o controle de materiais"
+        ],
+        articles: {
+          available: true,
+          title: "Divisão de Patrimônio e Almoxarifado – DPAT",
+          sections: [
+            {
+              title: "Gestão de Imóveis – Sistema SGI",
+              content: [
+                "Responsável por 7.592 imóveis no Estado de São Paulo, distribuídos entre 9 departamentos e 91 Diretorias",
+                "Analisar e tramitar processos relacionados à regularização de imóveis",
+                "Encaminhar processos às áreas competentes (FDE, DIISE, DGREM e Unidades Regionais)",
+                "Autuar processos do PAINSP e receber terrenos doados pelas prefeituras",
+                "Capacitar as Diretorias de Ensino sobre o SGI e a importância da regularização fundiária",
+                "Elaborar manuais e guias de procedimentos, atendendo aos decretos nº 61.163/2015 e 64.030/2018"
+              ]
+            },
+            {
+              title: "Gestão de Bens Móveis – Sistema GEMAT",
+              content: [
+                "Gestão e atualização de dados de bens móveis das Diretorias, Unidades Escolares e Prédios Administrativos",
+                "Inclusão, alteração e inativação de perfis de usuários responsáveis pelo sistema",
+                "Orientação às Diretorias sobre descarte de materiais inservíveis/excedentes",
+                "Inventário físico de todos os bens permanentes da COGESPA e unidades correlatas",
+                "Disponibilização e armazenamento de mobiliário nos depósitos da Casa Verde e São Domingos",
+                "Gestão de passagem de ônibus via GEMAT às Diretorias de Ensino",
+                "Implantação do sistema SAM Patrimônio para substituir o GEMAT"
+              ]
+            },
+            {
+              title: "Atualização e Controle de Dados",
+              content: [
+                "Gestão e atualização cadastral de imóveis no SGI",
+                "Orientação para abertura de processos de unidades escolarizadas municipalmente",
+                "Preenchimento de minutas de termos e escrituras",
+                "Tratativas com CDHU e COHAB para regularização fundiária via comodato",
+                "Responsabilidade pela renovação dos AVCBs dos prédios administrativos"
+              ]
+            }
+          ]
+        },
+        article: "Artigo 122"
+      },
+      transportes: {
+        title: "Divisão de Transportes",
+        summary: [
+          "Atender as 91 Diretorias de Ensino com suporte integral",
+          "Gerenciar procedimentos relacionados aos veículos oficiais e locados",
+          "Controlar manutenção, abastecimento e controle de tráfego",
+          "Fiscalizar documentação de veículos cedidos",
+          "Propor especificações para contratações e aquisições",
+          "Planejar o custo e uso da frota",
+          "Regularizar documentação de veículos",
+          "Instruir processos de doação de veículos"
+        ],
+        articles: {
+          available: true,
+          title: "Divisão de Transportes – DTRAN",
+          sections: [
+            {
+              title: "Gestão de Frota",
+              content: [
+                "Controle de cota anual: 5.000 litros de gasolina, 53.000 litros de diesel e 335.000 litros de etanol",
+                "Fiscalização e cobrança de documentação de 645 municípios com mais de 4.000 ônibus cedidos",
+                "Identificação e encaminhamento de infrações (multas) de veículos próprios e de terceiros",
+                "Lançamento de controle de tráfego no SAF, conforme Decreto nº 979/1973",
+                "Capacitação das 91 Diretorias para uso dos sistemas SAF e SIGEF"
+              ]
+            },
+            {
+              title: "Frota Atual",
+              content: [
+                "23 veículos próprios (carros, vans, caminhões e ônibus)",
+                "48 veículos locados com condutores da empresa DeivisonTur",
+                "63 veículos locados sem condutor, da empresa Bariri, atendendo dois lotes no interior",
+                "Controle de condutores autorizados, motoristas locados e agendamento de saídas",
+                "Recebimento de requisições de transporte e análise da disponibilidade da frota"
+              ]
+            },
+            {
+              title: "Documentação e Licenciamentos",
+              content: [
+                "Controle e emissão de documentos de veículos cedidos a municípios e APAEs",
+                "Emissão diária de licenciamentos digitais (aproximadamente 800 veículos/mês)",
+                "Emissão de termos de cessão de uso e rescisão",
+                "Entrega de microônibus aos municípios, coleta de assinaturas e documentação",
+                "Providenciar registros de veículos 0 km junto ao Detran"
+              ]
+            },
+            {
+              title: "Isenção de Pedágio e DPVAT",
+              content: [
+                "Solicitação de cartões de isenção para veículos oficiais em rodovias estaduais e federais",
+                "Preparação e pagamento das guias do seguro DPVAT",
+                "Autorização para servidores conduzirem veículos oficiais da SEDUC via SEI"
+              ]
+            }
+          ]
+        },
+        article: "Artigo 123"
+      },
+      zeladoria: {
+        title: "Divisão de Zeladoria",
+        summary: [
+          "Executar e organizar eventos internos e externos",
+          "Zelar pela organização e manutenção dos prédios administrativos",
+          "Gerenciar e fiscalizar serviços preventivos e corretivos",
+          "Propor especificações de materiais e equipamentos",
+          "Propor especificações para contratação de serviços terceirizados"
+        ],
+        articles: {
+          available: true,
+          title: "Divisão de Zeladoria – DZEL",
+          sections: [
+            {
+              title: "Gestão e Fiscalização Predial",
+              content: [
+                "Acompanhar empresas terceirizadas na execução dos serviços nos Prédios Administrativos",
+                "Verificar diariamente o funcionamento de elevadores, sistemas de iluminação, telefonia",
+                "Supervisionar monitoramento de segurança (câmeras), segurança patrimonial",
+                "Fiscalizar instalações elétricas e hidráulicas, manutenção preventiva e corretiva",
+                "Comunicar irregularidades às empresas prestadoras de serviços",
+                "Responsável pela renovação de AVCBs e manutenção de equipamentos de segurança contra incêndio"
+              ]
+            },
+            {
+              title: "Gestão de Eventos e Logística",
+              content: [
+                "Montagem, desmontagem e operação de equipamentos de áudio, vídeo e som em eventos",
+                "Transporte de materiais de consumo entre os prédios administrativos",
+                "Supervisão e execução de contratos administrativos de manutenção predial",
+                "Acompanhamento de execução contratual, pagamentos, reajustes e aditamentos"
+              ]
+            },
+            {
+              title: "Serviços Específicos",
+              content: [
+                "Recepção: identificação, controle de acesso e direcionamento de visitantes",
+                "Vigilância patrimonial: proteção preventiva do patrimônio e pessoas",
+                "Elevadores: verificação de funcionamento, manutenção, reajustes",
+                "Bombeiro: fiscalização do posto, equipamentos e rondas",
+                "Manobristas: controle de garagem, folhas de ponto e uniforme",
+                "Controle de pragas: fiscalização de serviços de desratização e desinsetização",
+                "Vigilância Eletrônica: gestão de cartões de acesso, monitoramento de imagens",
+                "Telefonia móvel pessoal: distribuição, configuração e manutenção de aparelhos"
+              ]
+            }
+          ]
+        },
+        article: "Artigo 121"
+      }
+    };
+
+    function openModal(type) {
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modalContent = document.getElementById('modal-content');
+
+      const data = competencias[type];
+
+      modalTitle.textContent = data.title;
+
+      // Criar estrutura com abas
+      let contentHTML = `
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab(event, 'summary')">
+                            📋 Resumo Executivo
+                        </button>
+                        <button class="tab" onclick="switchTab(event, 'articles')">
+                            📖 Artigos Detalhados
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="summary" class="tab-content active">
+                    <h3>Competências Principais</h3>
+            `;
+
+      // Aba 1: Resumo (competências atuais)
+      data.summary.forEach((competencia, index) => {
+        contentHTML += `
+                    <div class="competencia">
+                        <span class="competencia-number">${index + 1}.</span>
+                        ${competencia}
+                    </div>
+                `;
+      });
+
+      contentHTML += `
+                    <div class="reference">
+                        <strong>Base Legal:</strong> ${data.article}<br>
+                        <strong>Fonte:</strong> Resolução SEDUC-SP nº 108, de 28 de julho de 2025
+                    </div>
+                </div>
+                
+                <div id="articles" class="tab-content">
+            `;
+
+      // Aba 2: Artigos Detalhados
+      if (data.articles && data.articles.available) {
+        // Usar o título específico da unidade se disponível
+        const articleTitle = data.articles.title || data.title;
+        contentHTML += `<h3>${articleTitle}</h3>`;
+
+        // Verificar se há conteúdo direto (novo formato) ou seções (formato antigo)
+        if (data.articles.content) {
+          // Novo formato: conteúdo HTML direto
+          contentHTML += `<div class="article-section-full">${data.articles.content}</div>`;
+        } else if (data.articles.sections) {
+          // Formato antigo: seções organizadas
+          data.articles.sections.forEach(section => {
+            contentHTML += `
+                            <div class="article-section">
+                                <div class="article-title">${section.title}</div>
+                                <div class="article-content">
+                        `;
+
+            if (Array.isArray(section.content)) {
+              section.content.forEach(item => {
+                contentHTML += `<div class="article-item">${item}</div>`;
+              });
+            } else {
+              contentHTML += `<div class="article-item">${section.content}</div>`;
+            }
+
+            contentHTML += `
+                                </div>
+                            </div>
+                        `;
+          });
+        }
+      } else {
+        contentHTML += `
+                    <div class="coming-soon">
+                        <div class="icon">📄</div>
+                        <h3>Artigos Detalhados</h3>
+                        <p>As informações detalhadas dos artigos e subseções<br>
+                        serão adicionadas em breve.</p>
+                        <br>
+                        <p><strong>Base Legal:</strong> ${data.article}</p>
+                    </div>
+                `;
+      }
+
+      contentHTML += '</div>';
+
+      modalContent.innerHTML = contentHTML;
+      modal.style.display = 'block';
+    }
+
+    function switchTab(event, tabName) {
+      // Remover classe active de todas as abas
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+
+      // Adicionar classe active na aba clicada
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      modal.style.display = 'none';
+    }
+
+    // Fechar modal clicando fora dele
+    window.onclick = function (event) {
+      const modal = document.getElementById('modal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Criar organograma inicial
+    createOrganogram();
+
+    // Recriar organograma quando a tela for redimensionada
+    window.addEventListener('resize', function () {
+      createOrganogram();
+    });
+  </script>
+</body>
+
+</html>
