@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizador SVG - Zoom e Pan</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #222;
+      color: white;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
+    }
+
+    .btn {
+      background: #a10904;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      background: #a10904;
+    }
+
+    .zoom-info {
+      color: #ccc;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    .svg-container {
+      flex: 1;
+      overflow: hidden;
+      cursor: grab;
+      background: #333;
+      position: relative;
+    }
+
+    .svg-container.dragging {
+      cursor: grabbing;
+    }
+
+    .svg-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      transition: transform 0.1s ease-out;
+    }
+
+    .demo-svg {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+    }
+
+    .fullscreen-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1000;
+      transition: background 0.2s;
+    }
+
+    .fullscreen-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #ccc;
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="controls">
+      <button class="btn" onclick="zoomIn()">Zoom +</button>
+      <button class="btn" onclick="zoomOut()">Zoom -</button>
+      <button class="btn" onclick="resetZoom()">Reset</button>
+      <button class="btn" onclick="fitToScreen()">Ajustar</button>
+      <span class="zoom-info">Zoom: <span id="zoom-level">100%</span></span>
+    </div>
+
+    <div class="svg-container" id="svg-container">
+      <div class="svg-wrapper" id="svg-wrapper">
+        <div id="loading" style="color: #ccc; text-align: center; padding: 50px;">
+          Carregando dpgdoc.svg...
+        </div>
+        <div id="svg-content"></div>
+      </div>
+    </div>
+
+    <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Tela Cheia">
+      ⛶
+    </button>
+
+    <div class="instructions">
+      <div>🖱️ Clique e arraste para mover</div>
+      <div>🔍 Scroll do mouse para zoom</div>
+      <div>⌨️ Esc para sair da tela cheia</div>
+    </div>
+  </div>
+
+  <script>
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    const svgContainer = document.getElementById('svg-container');
+    const svgWrapper = document.getElementById('svg-wrapper');
+    const zoomLevelSpan = document.getElementById('zoom-level');
+
+    // Carregar o SVG do arquivo
+    async function loadSVG() {
+      try {
+        const response = await fetch('dpgdoc.svg');
+        if (!response.ok) {
+          throw new Error(`Erro ao carregar SVG: ${response.status}`);
+        }
+        const svgContent = await response.text();
+
+        const svgContentDiv = document.getElementById('svg-content');
+        const loadingDiv = document.getElementById('loading');
+
+        svgContentDiv.innerHTML = svgContent;
+        loadingDiv.style.display = 'none';
+
+        // Adicionar classe para estilização
+        const svgElement = svgContentDiv.querySelector('svg');
+        if (svgElement) {
+          svgElement.classList.add('demo-svg');
+        }
+
+        // Ajustar à tela após carregar
+        setTimeout(fitToScreen, 200);
+
+      } catch (error) {
+        console.error('Erro ao carregar o SVG:', error);
+        document.getElementById('loading').innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        <p>Erro ao carregar dpgdoc.svg</p>
+                        <p style="font-size: 12px; margin-top: 10px;">
+                            Verifique se o arquivo está na pasta raiz do projeto
+                        </p>
+                        <p style="font-size: 12px;">
+                            Erro: ${error.message}
+                        </p>
+                    </div>
+                `;
+      }
+    }
+
+    // Funcionalidades de zoom
+    function updateZoomDisplay() {
+      zoomLevelSpan.textContent = Math.round(scale * 100) + '%';
+    }
+
+    function updateTransform() {
+      svgWrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
+
+    function zoomIn() {
+      scale *= 1.2;
+      updateTransform();
+      updateZoomDisplay();
+    }
+
+    function zoomOut() {
+      scale /= 1.2;
+      updateTransform();
+      updateZoomDisplay();
+    }
+
+    function resetZoom() {
+      scale = 1;
+      translateX = 0;
+      translateY = 0;
+      updateTransform();
+      updateZoomDisplay();
+    }
+
+    function fitToScreen() {
+      const containerRect = svgContainer.getBoundingClientRect();
+      const svgRect = svgWrapper.querySelector('svg').getBoundingClientRect();
+
+      const scaleX = containerRect.width / svgRect.width;
+      const scaleY = containerRect.height / svgRect.height;
+
+      scale = Math.min(scaleX, scaleY) * 0.9; // 90% para margem
+      translateX = 0;
+      translateY = 0;
+
+      updateTransform();
+      updateZoomDisplay();
+    }
+
+    // Zoom com scroll do mouse
+    svgContainer.addEventListener('wheel', (e) => {
+      e.preventDefault();
+
+      const rect = svgContainer.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const oldScale = scale;
+
+      if (e.deltaY < 0) {
+        scale *= 1.1;
+      } else {
+        scale /= 1.1;
+      }
+
+      // Zoom centrado no mouse
+      const scaleChange = scale / oldScale;
+      translateX = mouseX - (mouseX - translateX) * scaleChange;
+      translateY = mouseY - (mouseY - translateY) * scaleChange;
+
+      updateTransform();
+      updateZoomDisplay();
+    });
+
+    // Funcionalidade de arrastar
+    svgContainer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      svgContainer.classList.add('dragging');
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - lastX;
+      const deltaY = e.clientY - lastY;
+
+      translateX += deltaX;
+      translateY += deltaY;
+
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      updateTransform();
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      svgContainer.classList.remove('dragging');
+    });
+
+    // Tela cheia
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Teclas de atalho
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'Escape':
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          }
+          break;
+        case '+':
+        case '=':
+          zoomIn();
+          break;
+        case '-':
+          zoomOut();
+          break;
+        case '0':
+          resetZoom();
+          break;
+        case 'f':
+        case 'F':
+          fitToScreen();
+          break;
+      }
+    });
+
+    // Inicialização
+    updateZoomDisplay();
+
+    // Carregar o SVG ao inicializar
+    loadSVG();
+  </script>
+</body>
+
+</html>

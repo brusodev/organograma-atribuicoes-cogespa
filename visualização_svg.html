@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>SVG Fullscreen com Zoom</title>
+  <style>
+    body {
+      margin: 0;
+      background: #eee;
+    }
+
+    svg {
+      width: 100vw;
+      height: 100vh;
+      cursor: grab;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="abrirTelaCheia()">Tela Cheia</button>
+  <object id="meuSvg" data="dpgdoc.svg" type="image/svg+xml" style="width:100vw; height:100vh; border:none;"></object>
+
+
+  <script>
+    let svg = document.getElementById("meuSvg");
+    let viewBox = { x: 0, y: 0, w: 800, h: 600 };
+
+    // Função para atualizar o viewBox
+    function updateViewBox() {
+      svg.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+    }
+
+    // Zoom com scroll do mouse
+    svg.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      let zoomFactor = 1.1;
+      if (e.deltaY < 0) { // zoom in
+        viewBox.w /= zoomFactor;
+        viewBox.h /= zoomFactor;
+      } else { // zoom out
+        viewBox.w *= zoomFactor;
+        viewBox.h *= zoomFactor;
+      }
+      updateViewBox();
+    });
+
+    // Arrastar para mover (pan)
+    let isPanning = false;
+    let startX, startY;
+    svg.addEventListener("mousedown", (e) => {
+      isPanning = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      svg.style.cursor = "grabbing";
+    });
+    svg.addEventListener("mouseup", () => {
+      isPanning = false;
+      svg.style.cursor = "grab";
+    });
+    svg.addEventListener("mousemove", (e) => {
+      if (isPanning) {
+        let dx = (e.clientX - startX) * (viewBox.w / svg.clientWidth);
+        let dy = (e.clientY - startY) * (viewBox.h / svg.clientHeight);
+        viewBox.x -= dx;
+        viewBox.y -= dy;
+        startX = e.clientX;
+        startY = e.clientY;
+        updateViewBox();
+      }
+    });
+
+    // Tela cheia
+    function abrirTelaCheia() {
+      if (svg.requestFullscreen) {
+        svg.requestFullscreen();
+      } else if (svg.webkitRequestFullscreen) {
+        svg.webkitRequestFullscreen();
+      } else if (svg.msRequestFullscreen) {
+        svg.msRequestFullscreen();
+      }
+    }
+  </script>
+</body>
+
+</html>

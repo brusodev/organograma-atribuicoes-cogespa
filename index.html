@@ -32,10 +32,64 @@
           <div class="tabs">
             <button class="tab active" data-tab="resumo">RESOLUÇÃO SEDUC N° 108, DE 28 DE JULHO DE 2025</button>
             <button class="tab" data-tab="detalhes">DETALHAMENTO DAS ATRIBUIÇÕES</button>
+            <button class="tab" data-tab="fluxogramas">FLUXOGRAMAS</button>
+            <button class="tab" data-tab="diagramas">DIAGRAMAS</button>
           </div>
         </div>
         <div id="resumo" class="tab-content active"></div>
         <div id="detalhes" class="tab-content"></div>
+        <div id="fluxogramas" class="tab-content">
+          <div class="svg-buttons-container">
+            <p class="section-title">Visualizar Fluxogramas:</p>
+            <div class="svg-buttons-grid">
+              <!-- Botões serão gerados dinamicamente pelo JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div id="diagramas" class="tab-content">
+          <div class="svg-buttons-container">
+            <p class="section-title">Visualizar Diagramas:</p>
+            <div class="svg-buttons-grid">
+              <!-- Botões serão gerados dinamicamente pelo JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Visualização SVG -->
+  <div id="svgViewerModal" class="svg-viewer-modal">
+    <div class="svg-viewer-container">
+      <div class="svg-viewer-controls">
+        <button class="svg-viewer-btn" onclick="svgZoomIn()">Zoom +</button>
+        <button class="svg-viewer-btn" onclick="svgZoomOut()">Zoom -</button>
+        <button class="svg-viewer-btn" onclick="svgResetZoom()">Reset</button>
+        <button class="svg-viewer-btn" onclick="svgFitToScreen()">Ajustar</button>
+        <span class="svg-viewer-zoom-info">Zoom: <span id="svg-zoom-level">100%</span></span>
+      </div>
+
+      <div class="svg-viewer-content" id="svg-viewer-content">
+        <div class="svg-viewer-wrapper" id="svg-viewer-wrapper">
+          <div id="svg-loading" style="color: #ccc; text-align: center; padding: 50px;">
+            Carregando...
+          </div>
+          <div id="svg-viewer-svg-content"></div>
+        </div>
+      </div>
+
+      <button class="svg-viewer-close" onclick="closeSvgViewer()" title="Fechar">
+        ×
+      </button>
+
+      <button class="fullscreen-btn" onclick="toggleSvgFullscreen()" title="Tela Cheia">
+        ⛶
+      </button>
+
+      <div class="svg-viewer-instructions">
+        <div>🖱️ Clique e arraste para mover</div>
+        <div>🔍 Scroll do mouse para zoom</div>
+        <div>⌨️ Esc para sair da tela cheia</div>
       </div>
     </div>
   </div>

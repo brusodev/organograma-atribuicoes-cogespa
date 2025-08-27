@@ -933,6 +933,9 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
     }
 
+    // Preencher abas de SVG
+    populateSvgTabs(id);
+
     modal.style.display = 'block';
     // Reset tabs to default
     document.querySelector('.tab[data-tab="resumo"]').click();
@@ -969,7 +972,446 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // ====== FUNCIONALIDADES SVG ======
+
+  // Dados dos SVGs para cada unidade
+  const svgData = {
+    main: {
+      fluxogramas: [
+        {
+          name: 'Arquivo 1',
+          file: 'fluxograma_cogespa_geral.svg',
+        },
+        {
+          name: 'Arquivo 2',
+          file: 'fluxograma_processo_admin.svg',
+        },
+      ],
+      diagramas: [
+        { name: 'Arquivo 1', file: 'dpgdoc.svg' },
+        { name: 'Arquivo 2', file: 'diagrama_estrutura.svg' },
+      ],
+    },
+
+    programacao: {
+      fluxogramas: [
+        {
+          name: 'Arquivo 1',
+          file: 'fluxograma_coprog_programacao.svg',
+        },
+        {
+          name: 'Arquivo 2',
+          file: 'fluxograma_coprog_contratos.svg',
+        },
+      ],
+      diagramas: [
+        { name: 'Arquivo 1', file: 'diagrama_coprog.svg' },
+        { name: 'Arquivo 2', file: 'diagrama_processos_coprog.svg' },
+      ],
+    },
+    execucao: {
+      fluxogramas: [
+        { name: 'Arquivo 1', file: 'fluxograma_coex_execucao.svg' },
+        { name: 'Arquivo 2', file: 'fluxograma_coex_controle.svg' },
+      ],
+      diagramas: [
+        { name: 'Arquivo 1', file: 'diagrama_coex.svg' },
+        {
+          name: 'Arquivo 2',
+          file: 'diagrama_integracao_coex.svg',
+        },
+      ],
+    },
+    gestao: {
+      fluxogramas: [
+        {
+          name: 'Arquivo 1',
+          file: '/fluxogramas/dpgdoc/fluxograma_dpgdoc_gestao.svg',
+        },
+        {
+          name: 'ARquivos 2',
+          file: 'fluxograma_dpgdoc_protocolo.svg',
+        },
+      ],
+      diagramas: [
+        {
+          name: 'Arquivo 1',
+          file: '/diagramas/dpgdoc/diagrama_sistemas_dpgdoc.svg',
+        },
+        { name: 'Arquivo 2', file: 'diagrama_fluxo_documental.svg' },
+      ],
+    },
+
+    patrimonio: {
+      fluxogramas: [
+        {
+          name: 'Arquivo 1',
+          file: 'fluxograma_dpat_patrimonio.svg',
+        },
+        { name: 'Arquivo 2', file: 'fluxograma_dpat_almoxarifado.svg' },
+      ],
+      diagramas: [
+        {
+          name: 'Arquivo 1',
+          file: '/diagramas/dpat/diagrama_sistemas_dpat.svg',
+        },
+        { name: 'Arquivo 2', file: '/diagramas/dpat/diagrama_dpat_bens.svg' },
+      ],
+    },
+
+    transportes: {
+      fluxogramas: [
+        { name: 'Arquivo 1', file: 'fluxograma_dtran_frota.svg' },
+        {
+          name: 'Arquivo 2',
+          file: 'fluxograma_dtran_documentacao.svg',
+        },
+      ],
+      diagramas: [
+        { name: 'Arquivo 1', file: 'diagrama_dtran_sistemas.svg' },
+        { name: 'Arquivo 2', file: 'diagrama_dtran_trafego.svg' },
+      ],
+    },
+
+    zeladoria: {
+      fluxogramas: [
+        { name: 'Arquivo 1', file: 'fluxograma_dzel_manutencao.svg' },
+        { name: 'Arquivo 2', file: 'fluxograma_dzel_eventos.svg' },
+      ],
+      diagramas: [
+        {
+          name: 'Arquivo 1',
+          file: '/diagramas/dzel/diagrama_dzel_servicos.svg',
+        },
+        {
+          name: 'Arquivo 2',
+          file: '/diagramas/dzel/diagrama_dzel_eventos.svg',
+        },
+      ],
+    },
+  };
+
+  function populateSvgTabs(unitId) {
+    const fluxogramasContent = document.getElementById('fluxogramas');
+    const diagramasContent = document.getElementById('diagramas');
+    const unitSvgs = svgData[unitId];
+
+    if (!unitSvgs) {
+      // Se não houver SVGs para esta unidade, mostrar mensagem
+      const noContentMessage = `
+        <div class="coming-soon">
+          <div class="icon">📊</div>
+          <h3>Em desenvolvimento</h3>
+          <p>Os fluxogramas e diagramas para esta unidade estarão disponíveis em breve.</p>
+        </div>
+      `;
+      fluxogramasContent.innerHTML = noContentMessage;
+      diagramasContent.innerHTML = noContentMessage;
+      return;
+    }
+
+    // Preencher fluxogramas
+    if (unitSvgs.fluxogramas && unitSvgs.fluxogramas.length > 0) {
+      const fluxButtons = unitSvgs.fluxogramas
+        .map(
+          (svg) =>
+            `<button class="svg-button" onclick="openSvgViewer('${svg.file}', '${svg.name}')">
+          <span class="svg-button-icon">🔁</span>${svg.name}
+        </button>`
+        )
+        .join('');
+
+      fluxogramasContent.innerHTML = `
+        <div class="svg-buttons-container">
+          <p class="section-title">Visualizar Fluxogramas:</p>
+          <div class="svg-buttons-grid">
+            ${fluxButtons}
+          </div>
+        </div>
+      `;
+    } else {
+      fluxogramasContent.innerHTML = `
+        <div class="coming-soon">
+          <div class="icon">🔁</div>
+          <h3>Em desenvolvimento</h3>
+          <p>Os fluxogramas para esta unidade estarão disponíveis em breve.</p>
+        </div>
+      `;
+    }
+
+    // Preencher diagramas
+    if (unitSvgs.diagramas && unitSvgs.diagramas.length > 0) {
+      const diagramButtons = unitSvgs.diagramas
+        .map(
+          (svg) =>
+            `<button class="svg-button" onclick="openSvgViewer('${svg.file}', '${svg.name}')">
+          <span class="svg-button-icon">📊</span>${svg.name}
+        </button>`
+        )
+        .join('');
+
+      diagramasContent.innerHTML = `
+        <div class="svg-buttons-container">
+          <p class="section-title">Visualizar Diagramas:</p>
+          <div class="svg-buttons-grid">
+            ${diagramButtons}
+          </div>
+        </div>
+      `;
+    } else {
+      diagramasContent.innerHTML = `
+        <div class="coming-soon">
+          <div class="icon">📊</div>
+          <h3>Em desenvolvimento</h3>
+          <p>Os diagramas para esta unidade estarão disponíveis em breve.</p>
+        </div>
+      `;
+    }
+  }
+
+  // ====== VISUALIZADOR SVG ======
+  let svgScale = 1;
+  let svgTranslateX = 0;
+  let svgTranslateY = 0;
+  let svgIsDragging = false;
+  let svgLastX = 0;
+  let svgLastY = 0;
+
+  const svgViewerModal = document.getElementById('svgViewerModal');
+  const svgViewerContent = document.getElementById('svg-viewer-content');
+  const svgViewerWrapper = document.getElementById('svg-viewer-wrapper');
+  const svgZoomLevelSpan = document.getElementById('svg-zoom-level');
+
   // Initial organogram creation and responsive handling
   createOrganogram();
   window.addEventListener('resize', createOrganogram);
+});
+
+// ====== FUNÇÕES GLOBAIS DO VISUALIZADOR SVG ======
+
+// Abrir visualizador SVG
+async function openSvgViewer(filename, title) {
+  const svgViewerModal = document.getElementById('svgViewerModal');
+  const svgViewerSvgContent = document.getElementById('svg-viewer-svg-content');
+  const svgLoading = document.getElementById('svg-loading');
+
+  // Reset variáveis
+  svgScale = 1;
+  svgTranslateX = 0;
+  svgTranslateY = 0;
+
+  // Mostrar modal e loading
+  svgViewerModal.style.display = 'block';
+  svgLoading.style.display = 'block';
+  svgLoading.innerHTML = `Carregando ${title}...`;
+  svgViewerSvgContent.innerHTML = '';
+
+  try {
+    const response = await fetch(filename);
+    if (!response.ok) {
+      throw new Error(`Erro ao carregar SVG: ${response.status}`);
+    }
+    const svgContent = await response.text();
+
+    svgViewerSvgContent.innerHTML = svgContent;
+    svgLoading.style.display = 'none';
+
+    // Adicionar classe para estilização
+    const svgElement = svgViewerSvgContent.querySelector('svg');
+    if (svgElement) {
+      svgElement.classList.add('svg-viewer-svg');
+    }
+
+    // Ajustar à tela após carregar
+    setTimeout(svgFitToScreen, 200);
+  } catch (error) {
+    console.error('Erro ao carregar o SVG:', error);
+    svgLoading.innerHTML = `
+      <div style="color: #ff6b6b;">
+        <p>Erro ao carregar ${filename}</p>
+        <p style="font-size: 12px; margin-top: 10px;">
+          Verifique se o arquivo está na pasta raiz do projeto
+        </p>
+        <p style="font-size: 12px;">
+          Erro: ${error.message}
+        </p>
+      </div>
+    `;
+  }
+}
+
+// Fechar visualizador SVG
+function closeSvgViewer() {
+  const svgViewerModal = document.getElementById('svgViewerModal');
+  svgViewerModal.style.display = 'none';
+}
+
+// Funções de zoom do SVG
+function svgUpdateZoomDisplay() {
+  const svgZoomLevelSpan = document.getElementById('svg-zoom-level');
+  svgZoomLevelSpan.textContent = Math.round(svgScale * 100) + '%';
+}
+
+function svgUpdateTransform() {
+  const svgViewerWrapper = document.getElementById('svg-viewer-wrapper');
+  svgViewerWrapper.style.transform = `translate(${svgTranslateX}px, ${svgTranslateY}px) scale(${svgScale})`;
+}
+
+function svgZoomIn() {
+  svgScale *= 1.2;
+  svgUpdateTransform();
+  svgUpdateZoomDisplay();
+}
+
+function svgZoomOut() {
+  svgScale /= 1.2;
+  svgUpdateTransform();
+  svgUpdateZoomDisplay();
+}
+
+function svgResetZoom() {
+  svgScale = 1;
+  svgTranslateX = 0;
+  svgTranslateY = 0;
+  svgUpdateTransform();
+  svgUpdateZoomDisplay();
+}
+
+function svgFitToScreen() {
+  const svgViewerContent = document.getElementById('svg-viewer-content');
+  const svgViewerWrapper = document.getElementById('svg-viewer-wrapper');
+  const svgElement = svgViewerWrapper.querySelector('svg');
+
+  if (!svgElement) return;
+
+  const containerRect = svgViewerContent.getBoundingClientRect();
+  const svgRect = svgElement.getBoundingClientRect();
+
+  const scaleX = containerRect.width / svgRect.width;
+  const scaleY = containerRect.height / svgRect.height;
+
+  svgScale = Math.min(scaleX, scaleY) * 0.9; // 90% para margem
+  svgTranslateX = 0;
+  svgTranslateY = 0;
+
+  svgUpdateTransform();
+  svgUpdateZoomDisplay();
+}
+
+// Função para alternar tela cheia do SVG
+function toggleSvgFullscreen() {
+  const svgViewerModal = document.getElementById('svgViewerModal');
+
+  if (!document.fullscreenElement) {
+    svgViewerModal.requestFullscreen().catch((err) => {
+      console.log(`Erro ao entrar em tela cheia: ${err.message}`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+// Event listeners do visualizador SVG
+document.addEventListener('DOMContentLoaded', function () {
+  const svgViewerContent = document.getElementById('svg-viewer-content');
+  const svgViewerWrapper = document.getElementById('svg-viewer-wrapper');
+  const svgZoomLevelSpan = document.getElementById('svg-zoom-level');
+
+  // Zoom com scroll do mouse
+  svgViewerContent.addEventListener('wheel', (e) => {
+    e.preventDefault();
+
+    const rect = svgViewerContent.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const oldScale = svgScale;
+
+    if (e.deltaY < 0) {
+      svgScale *= 1.1;
+    } else {
+      svgScale /= 1.1;
+    }
+
+    // Zoom centrado no mouse
+    const scaleChange = svgScale / oldScale;
+    svgTranslateX = mouseX - (mouseX - svgTranslateX) * scaleChange;
+    svgTranslateY = mouseY - (mouseY - svgTranslateY) * scaleChange;
+
+    svgUpdateTransform();
+    svgUpdateZoomDisplay();
+  });
+
+  // Funcionalidade de arrastar
+  svgViewerContent.addEventListener('mousedown', (e) => {
+    svgIsDragging = true;
+    svgLastX = e.clientX;
+    svgLastY = e.clientY;
+    svgViewerContent.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!svgIsDragging) return;
+
+    const deltaX = e.clientX - svgLastX;
+    const deltaY = e.clientY - svgLastY;
+
+    svgTranslateX += deltaX;
+    svgTranslateY += deltaY;
+
+    svgLastX = e.clientX;
+    svgLastY = e.clientY;
+
+    svgUpdateTransform();
+  });
+
+  document.addEventListener('mouseup', () => {
+    svgIsDragging = false;
+    if (svgViewerContent) {
+      svgViewerContent.classList.remove('dragging');
+    }
+  });
+
+  // Teclas de atalho
+  document.addEventListener('keydown', (e) => {
+    const svgViewerModal = document.getElementById('svgViewerModal');
+    if (svgViewerModal.style.display !== 'block') return;
+
+    switch (e.key) {
+      case 'Escape':
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          closeSvgViewer();
+        }
+        break;
+      case '+':
+      case '=':
+        svgZoomIn();
+        break;
+      case '-':
+        svgZoomOut();
+        break;
+      case '0':
+        svgResetZoom();
+        break;
+      case 'f':
+      case 'F':
+        if (e.ctrlKey) {
+          e.preventDefault();
+          toggleSvgFullscreen();
+        } else {
+          svgFitToScreen();
+        }
+        break;
+      case 'F11':
+        e.preventDefault();
+        toggleSvgFullscreen();
+        break;
+    }
+  });
+
+  // Inicialização
+  svgUpdateZoomDisplay();
 });

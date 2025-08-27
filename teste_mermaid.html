@@ -1,0 +1,26 @@
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true });
+</script>
+
+<div class="mermaid">
+  flowchart LR
+  B --> C["Processos Administrativos"] & H["Correspondências/Expediente"] & M["Protocolo"] & V["Serviços de Motofrete"] & X["Malote"]
+  C --> D["Publicação no DOE"]
+  D --> E["Prazo de 30 dias para vistas e interposição de recurso"]
+  E --> F["Concessão de vistas de processos"]
+  F --> G["Devolução de processos com prazo decorrido ou com interposição de recurso"]
+  H --> I["Recebimento de cartas"]
+  I --> J["Postagem no Correios"] & K["Emissão de número de A.R."]
+  K --> L["Disponibilização do número para o solicitante"]
+  M --> N["Atendimento ao público"] & S["Aberturas e encerramentos de volumes"] & T["Encorporação e apensamento de documentos em processos físicos"] & U["Tramitação de processos para os órgãos externos"]
+  N --> O["Ofícios / Requerimentos"]
+  O --> P["Análise dos documentos"]
+  P --> Q["Criação de documentos no SEI"]
+  Q --> R["Encaminhamentos para as áreas responsáveis"]
+  V --> W["Entrega de documentos e processos para serem entregues aos órgãos externos"]
+  X --> Y["Recebimentos de documentos e processos das Unidades Regionais de Ensino - URE"] & Z["Envios de documentos e processos para as Unidades Regionais de Ensino - URE"]
+  AA --> AB["Recebimento de processo"] & AC["Conferência de paginação"] & AD["Identificação de sala, corredor e estante"] & AE["Identificação por número estante e número prateleira"] & AF["Arquivamentos"] & AG["Conferência da guarda do processo"] & AH["Pedido de consultas / desarquivamentos"]
+  
+
+</div>
