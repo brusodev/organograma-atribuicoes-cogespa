@@ -1096,16 +1096,11 @@ document.addEventListener('DOMContentLoaded', function () {
     zeladoria: {
       fluxogramas: [
         { name: 'Arquivo 1', file: 'fluxograma_dzel_manutencao.svg' },
-        { name: 'Arquivo 2', file: 'fluxograma_dzel_eventos.svg' },
       ],
       diagramas: [
         {
           name: 'Arquivo 1',
           file: '/diagramas/dzel/diagrama_dzel_servicos.svg',
-        },
-        {
-          name: 'Arquivo 2',
-          file: '/diagramas/dzel/diagrama_dzel_eventos.svg',
         },
       ],
     },
