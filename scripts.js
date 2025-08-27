@@ -987,27 +987,45 @@ document.addEventListener('DOMContentLoaded', function () {
           file: 'fluxograma_processo_admin.svg',
         },
       ],
-      diagramas: [
-        { name: 'Arquivo 1', file: 'dpgdoc.svg' },
-        { name: 'Arquivo 2', file: 'diagrama_estrutura.svg' },
-      ],
+      diagramas: [{ name: 'Arquivo 1', file: 'dpgdoc.svg' }],
     },
 
     programacao: {
       fluxogramas: [
         {
-          name: 'Arquivo 1',
-          file: 'fluxograma_coprog_programacao.svg',
+          name: 'ATA',
+          file: '/fluxogramas/coprog/ata.svg',
         },
         {
-          name: 'Arquivo 2',
-          file: 'fluxograma_coprog_contratos.svg',
+          name: 'ATA DE ALIMENTAÇÃO',
+          file: '/fluxogramas/coprog/ata_alimentacao.svg',
+        },
+        {
+          name: 'ATA DE ORGANIZAÇÃO',
+          file: '/fluxogramas/coprog/ata_organizacao.svg',
+        },
+        {
+          name: 'CERTIFICADO DIGITAL',
+          file: '/fluxogramas/coprog/certificado_digital.svg',
+        },
+        {
+          name: 'CONTRATAÇÃO DE SERVIÇOS / AQUISIÇÃO',
+          file: '/fluxogramas/coprog/contratacao_servico_aquisicao.svg',
+        },
+        {
+          name: 'CONTRATO DE CAMISETAS E MEDALHAS OMASP',
+          file: '/fluxogramas/coprog/contrato_camiseta_medalhas.svg',
+        },
+        {
+          name: 'PASSAGENS AÉREAS',
+          file: '/fluxogramas/coprog/passagens_aereas.svg',
+        },
+        {
+          name: 'PUBLICAÇÃO EM DIARIO OFICIAL',
+          file: '/fluxogramas/coprog/publicacao_doe.svg',
         },
       ],
-      diagramas: [
-        { name: 'Arquivo 1', file: 'diagrama_coprog.svg' },
-        { name: 'Arquivo 2', file: 'diagrama_processos_coprog.svg' },
-      ],
+      diagramas: [{ name: 'Arquivo 1', file: 'diagrama_coprog.svg' }],
     },
     execucao: {
       fluxogramas: [
@@ -1025,12 +1043,8 @@ document.addEventListener('DOMContentLoaded', function () {
     gestao: {
       fluxogramas: [
         {
-          name: 'Arquivo 1',
-          file: '/fluxogramas/dpgdoc/fluxograma_dpgdoc_gestao.svg',
-        },
-        {
-          name: 'ARquivos 2',
-          file: 'fluxograma_dpgdoc_protocolo.svg',
+          name: 'PROCESSOS ADMINISTRATIVOS',
+          file: '/fluxogramas/dpgdoc/processo_administrativo.svg',
         },
       ],
       diagramas: [
@@ -1038,39 +1052,45 @@ document.addEventListener('DOMContentLoaded', function () {
           name: 'Arquivo 1',
           file: '/diagramas/dpgdoc/diagrama_sistemas_dpgdoc.svg',
         },
-        { name: 'Arquivo 2', file: 'diagrama_fluxo_documental.svg' },
       ],
     },
 
     patrimonio: {
       fluxogramas: [
         {
-          name: 'Arquivo 1',
-          file: 'fluxograma_dpat_patrimonio.svg',
+          name: 'SAM PATRIMONIO E BENS MOVEIS',
+          file: '/fluxogramas/dpat/patrimonio_bens_moveis.svg',
         },
-        { name: 'Arquivo 2', file: 'fluxograma_dpat_almoxarifado.svg' },
+        { name: 'SAM ESTOQUE', file: '/fluxogramas/dpat/sam_estoque.svg' },
       ],
       diagramas: [
         {
           name: 'Arquivo 1',
           file: '/diagramas/dpat/diagrama_sistemas_dpat.svg',
         },
-        { name: 'Arquivo 2', file: '/diagramas/dpat/diagrama_dpat_bens.svg' },
       ],
     },
 
     transportes: {
       fluxogramas: [
-        { name: 'Arquivo 1', file: 'fluxograma_dtran_frota.svg' },
         {
-          name: 'Arquivo 2',
-          file: 'fluxograma_dtran_documentacao.svg',
+          name: 'DOAÇÃO DE ÔNIBUS',
+          file: '/fluxogramas/dtran/doacao_onibus.svg',
+        },
+        {
+          name: 'CESSÃO DE USO',
+          file: '/fluxogramas/dtran/cessao_uso.svg',
+        },
+        {
+          name: 'MULTAS',
+          file: '/fluxogramas/dtran/multas.svg',
+        },
+        {
+          name: 'SOLICITAÇÃO DE TRANSPORTE',
+          file: '/fluxogramas/dtran/solicitacao_transportes.svg',
         },
       ],
-      diagramas: [
-        { name: 'Arquivo 1', file: 'diagrama_dtran_sistemas.svg' },
-        { name: 'Arquivo 2', file: 'diagrama_dtran_trafego.svg' },
-      ],
+      diagramas: [{ name: 'Arquivo 1', file: 'diagrama_dtran_sistemas.svg' }],
     },
 
     zeladoria: {
