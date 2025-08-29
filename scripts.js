@@ -1046,6 +1046,48 @@ document.addEventListener('DOMContentLoaded', function () {
           name: 'PROCESSOS ADMINISTRATIVOS',
           file: '/fluxogramas/dpgdoc/processo_administrativo.svg',
         },
+        {
+          name: 'CORRESPONDÊNCIA-EXPEDIENTE-MOTOFRETE-MALOTE',
+          file: '/fluxogramas/dpgdoc/correspondencia_expendiente_servico_malote.svg',
+        },
+        {
+          name: 'PROTOCOLO',
+          file: '/fluxogramas/dpgdoc/protocolo.svg',
+        },
+        {
+          name: 'DOCUMENTAÇÃO E ARQUIVO',
+          file: '/fluxogramas/dpgdoc/documentacao_arquivo.svg',
+        },
+
+        {
+          name: 'SISTEMA SEI',
+          file: '/fluxogramas/dpgdoc/demandas_sei.svg',
+        },
+        {
+          name: 'DEMANDAS',
+          file: '/fluxogramas/dpgdoc/demandas.svg',
+        },
+        {
+          name: 'SP DIGITAIS',
+          file: '/fluxogramas/dpgdoc/sp_digitais.svg',
+        },
+        {
+          name: 'SP DOC',
+          file: '/fluxogramas/dpgdoc/sp_doc.svg',
+        },
+
+        {
+          name: 'ELIMINAÇÃO DE DOCUMENTOS',
+          file: '/fluxogramas/dpgdoc/eliminacao_documentos.svg',
+        },
+        {
+          name: 'SERVIÇOS GRÁFICOS',
+          file: '/fluxogramas/dpgdoc/servicos_graficos.svg',
+        },
+        {
+          name: 'PAGAMENTO DO CONTR. SER.GRAFICOS',
+          file: '/fluxogramas/dpgdoc/pagamento_contrato.svg',
+        },
       ],
       diagramas: [
         {
