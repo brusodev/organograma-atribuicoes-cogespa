@@ -1,0 +1,13 @@
+.claude/
+.vscode/
+.idea/
+node/
+dist/
+build/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.local

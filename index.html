@@ -32,12 +32,21 @@
           <div class="tabs">
             <button class="tab active" data-tab="resumo">RESOLUÇÃO SEDUC N° 108, DE 28 DE JULHO DE 2025</button>
             <button class="tab" data-tab="detalhes">DETALHAMENTO DAS ATRIBUIÇÕES</button>
+            <button class="tab" data-tab="servidores">SERVIDORES</button>
             <button class="tab" data-tab="fluxogramas">FLUXOGRAMAS</button>
             <button class="tab" data-tab="diagramas">DIAGRAMAS</button>
           </div>
         </div>
         <div id="resumo" class="tab-content active"></div>
         <div id="detalhes" class="tab-content"></div>
+        <div id="servidores" class="tab-content">
+          <div class="servidores-container">
+            <p class="section-title">Lista de Servidores:</p>
+            <div id="servidores-lista">
+              <!-- Lista será preenchida dinamicamente pelo JavaScript -->
+            </div>
+          </div>
+        </div>
         <div id="fluxogramas" class="tab-content">
           <div class="svg-buttons-container">
             <p class="section-title">Visualizar Fluxogramas:</p>
@@ -94,6 +103,7 @@
     </div>
   </div>
 
+  <script src="funcionarios_data.js"></script>
   <script src="scripts.js"></script>
 </body>
 

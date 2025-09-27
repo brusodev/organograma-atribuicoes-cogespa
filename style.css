@@ -627,3 +627,109 @@
           margin: 10px 0;
         }
       }
+
+      /* ====== ESTILOS PARA ABA DE SERVIDORES ====== */
+      .servidores-container {
+        padding: 20px 0;
+      }
+
+      .servidores-count {
+        background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 1rem;
+      }
+
+      .servidores-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      .servidor-item {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        border-left: 4px solid #c41e3a;
+      }
+
+      .servidor-item:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .servidor-nome {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #2c2c2c;
+        margin-bottom: 8px;
+        line-height: 1.2;
+      }
+
+      .servidor-cargo {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+
+      .servidor-setor {
+        color: #c41e3a;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Scroll customizado para lista de servidores */
+      .servidores-list::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .servidores-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      .servidores-list::-webkit-scrollbar-thumb {
+        background: #c41e3a;
+        border-radius: 4px;
+      }
+
+      .servidores-list::-webkit-scrollbar-thumb:hover {
+        background: #8b0000;
+      }
+
+      /* Responsividade para lista de servidores */
+      @media (max-width: 768px) {
+        .servidores-list {
+          grid-template-columns: 1fr;
+          gap: 10px;
+          max-height: 300px;
+        }
+
+        .servidor-item {
+          padding: 12px;
+        }
+
+        .servidor-nome {
+          font-size: 0.9rem;
+        }
+
+        .servidor-cargo {
+          font-size: 0.8rem;
+        }
+
+        .servidor-setor {
+          font-size: 0.75rem;
+        }
+      }

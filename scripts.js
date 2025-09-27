@@ -936,6 +936,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Preencher abas de SVG
     populateSvgTabs(id);
 
+    // Preencher aba de servidores
+    populateServidoresTab(id);
+
     modal.style.display = 'block';
     // Reset tabs to default
     document.querySelector('.tab[data-tab="resumo"]').click();
@@ -977,6 +980,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Dados dos SVGs para cada unidade
   const svgData = {
     main: {
+      config: {
+        showFluxogramas: false,
+        showDiagramas: false
+      },
       fluxogramas: [
         {
           name: 'Arquivo 1',
@@ -991,6 +998,10 @@ document.addEventListener('DOMContentLoaded', function () {
     },
 
     programacao: {
+      config: {
+        showFluxogramas: true,
+        showDiagramas: false  // Exemplo: ocultar diagramas da COPROG
+      },
       fluxogramas: [
         {
           name: 'ATA',
@@ -1028,6 +1039,10 @@ document.addEventListener('DOMContentLoaded', function () {
       diagramas: [{ name: 'Arquivo 1', file: 'diagrama_coprog.svg' }],
     },
     execucao: {
+      config: {
+        showFluxogramas: false,  // Exemplo: ocultar fluxogramas da COEX
+        showDiagramas: false
+      },
       fluxogramas: [
         { name: 'Arquivo 1', file: 'fluxograma_coex_execucao.svg' },
         { name: 'Arquivo 2', file: 'fluxograma_coex_controle.svg' },
@@ -1041,6 +1056,10 @@ document.addEventListener('DOMContentLoaded', function () {
       ],
     },
     gestao: {
+      config: {
+        showFluxogramas: true,
+        showDiagramas: true
+      },
       fluxogramas: [
         {
           name: 'PROCESSOS ADMINISTRATIVOS',
@@ -1098,6 +1117,10 @@ document.addEventListener('DOMContentLoaded', function () {
     },
 
     patrimonio: {
+      config: {
+        showFluxogramas: true,
+        showDiagramas: true  // Exemplo: ocultar diagramas do DPAT
+      },
       fluxogramas: [
         {
           name: 'SAM PATRIMONIO E BENS MOVEIS',
@@ -1114,6 +1137,10 @@ document.addEventListener('DOMContentLoaded', function () {
     },
 
     transportes: {
+      config: {
+        showFluxogramas: true,
+        showDiagramas: false
+      },
       fluxogramas: [
         {
           name: 'DOAÇÃO DE ÔNIBUS',
@@ -1136,6 +1163,10 @@ document.addEventListener('DOMContentLoaded', function () {
     },
 
     zeladoria: {
+      config: {
+        showFluxogramas: false,  // Exemplo: ocultar fluxogramas da DZEL
+        showDiagramas: true    // Exemplo: ocultar diagramas da DZEL
+      },
       fluxogramas: [
         { name: 'Arquivo 1', file: 'fluxograma_dzel_manutencao.svg' },
       ],
@@ -1151,10 +1182,12 @@ document.addEventListener('DOMContentLoaded', function () {
   function populateSvgTabs(unitId) {
     const fluxogramasContent = document.getElementById('fluxogramas');
     const diagramasContent = document.getElementById('diagramas');
+    const fluxogramasTab = document.querySelector('.tab[data-tab="fluxogramas"]');
+    const diagramasTab = document.querySelector('.tab[data-tab="diagramas"]');
     const unitSvgs = svgData[unitId];
 
     if (!unitSvgs) {
-      // Se não houver SVGs para esta unidade, mostrar mensagem
+      // Se não houver SVGs para esta unidade, ocultar abas e mostrar mensagem
       const noContentMessage = `
         <div class="coming-soon">
           <div class="icon">📊</div>
@@ -1164,65 +1197,93 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
       fluxogramasContent.innerHTML = noContentMessage;
       diagramasContent.innerHTML = noContentMessage;
+      fluxogramasTab.style.display = 'none';
+      diagramasTab.style.display = 'none';
       return;
     }
 
-    // Preencher fluxogramas
-    if (unitSvgs.fluxogramas && unitSvgs.fluxogramas.length > 0) {
-      const fluxButtons = unitSvgs.fluxogramas
-        .map(
-          (svg) =>
-            `<button class="svg-button" onclick="openSvgViewer('${svg.file}', '${svg.name}')">
-          <span class="svg-button-icon">🔁</span>${svg.name}
-        </button>`
-        )
-        .join('');
+    // Verificar configurações de visibilidade
+    const config = unitSvgs.config || { showFluxogramas: true, showDiagramas: true };
 
-      fluxogramasContent.innerHTML = `
-        <div class="svg-buttons-container">
-          <p class="section-title">Visualizar Fluxogramas:</p>
-          <div class="svg-buttons-grid">
-            ${fluxButtons}
-          </div>
-        </div>
-      `;
+    // Controlar visibilidade das abas
+    if (config.showFluxogramas) {
+      fluxogramasTab.style.display = 'block';
     } else {
-      fluxogramasContent.innerHTML = `
-        <div class="coming-soon">
-          <div class="icon">🔁</div>
-          <h3>Em desenvolvimento</h3>
-          <p>Os fluxogramas para esta unidade estarão disponíveis em breve.</p>
-        </div>
-      `;
+      fluxogramasTab.style.display = 'none';
     }
 
-    // Preencher diagramas
-    if (unitSvgs.diagramas && unitSvgs.diagramas.length > 0) {
-      const diagramButtons = unitSvgs.diagramas
-        .map(
-          (svg) =>
-            `<button class="svg-button" onclick="openSvgViewer('${svg.file}', '${svg.name}')">
-          <span class="svg-button-icon">📊</span>${svg.name}
-        </button>`
-        )
-        .join('');
-
-      diagramasContent.innerHTML = `
-        <div class="svg-buttons-container">
-          <p class="section-title">Visualizar Diagramas:</p>
-          <div class="svg-buttons-grid">
-            ${diagramButtons}
-          </div>
-        </div>
-      `;
+    if (config.showDiagramas) {
+      diagramasTab.style.display = 'block';
     } else {
-      diagramasContent.innerHTML = `
-        <div class="coming-soon">
-          <div class="icon">📊</div>
-          <h3>Em desenvolvimento</h3>
-          <p>Os diagramas para esta unidade estarão disponíveis em breve.</p>
-        </div>
-      `;
+      diagramasTab.style.display = 'none';
+    }
+
+    // Preencher fluxogramas apenas se estiverem habilitados
+    if (config.showFluxogramas) {
+      if (unitSvgs.fluxogramas && unitSvgs.fluxogramas.length > 0) {
+        const fluxButtons = unitSvgs.fluxogramas
+          .map(
+            (svg) =>
+              `<button class="svg-button" onclick="openSvgViewer('${svg.file}', '${svg.name}')">
+            <span class="svg-button-icon">🔁</span>${svg.name}
+          </button>`
+          )
+          .join('');
+
+        fluxogramasContent.innerHTML = `
+          <div class="svg-buttons-container">
+            <p class="section-title">Visualizar Fluxogramas:</p>
+            <div class="svg-buttons-grid">
+              ${fluxButtons}
+            </div>
+          </div>
+        `;
+      } else {
+        fluxogramasContent.innerHTML = `
+          <div class="coming-soon">
+            <div class="icon">🔁</div>
+            <h3>Em desenvolvimento</h3>
+            <p>Os fluxogramas para esta unidade estarão disponíveis em breve.</p>
+          </div>
+        `;
+      }
+    } else {
+      // Se estiver desabilitado, deixar conteúdo vazio
+      fluxogramasContent.innerHTML = '';
+    }
+
+    // Preencher diagramas apenas se estiverem habilitados
+    if (config.showDiagramas) {
+      if (unitSvgs.diagramas && unitSvgs.diagramas.length > 0) {
+        const diagramButtons = unitSvgs.diagramas
+          .map(
+            (svg) =>
+              `<button class="svg-button" onclick="openSvgViewer('${svg.file}', '${svg.name}')">
+            <span class="svg-button-icon">📊</span>${svg.name}
+          </button>`
+          )
+          .join('');
+
+        diagramasContent.innerHTML = `
+          <div class="svg-buttons-container">
+            <p class="section-title">Visualizar Diagramas:</p>
+            <div class="svg-buttons-grid">
+              ${diagramButtons}
+            </div>
+          </div>
+        `;
+      } else {
+        diagramasContent.innerHTML = `
+          <div class="coming-soon">
+            <div class="icon">📊</div>
+            <h3>Em desenvolvimento</h3>
+            <p>Os diagramas para esta unidade estarão disponíveis em breve.</p>
+          </div>
+        `;
+      }
+    } else {
+      // Se estiver desabilitado, deixar conteúdo vazio
+      diagramasContent.innerHTML = '';
     }
   }
 
@@ -1472,3 +1533,71 @@ document.addEventListener('DOMContentLoaded', function () {
   // Inicialização
   svgUpdateZoomDisplay();
 });
+
+// ====== FUNÇÃO PARA POPULAR ABA DE SERVIDORES ======
+function populateServidoresTab(unitId) {
+  const servidoresLista = document.getElementById('servidores-lista');
+
+  // Verificar se temos dados de funcionários
+  if (typeof funcionariosData === 'undefined' || !funcionariosData) {
+    servidoresLista.innerHTML = `
+      <div class="coming-soon">
+        <div class="icon">👥</div>
+        <h3>Dados não disponíveis</h3>
+        <p>Os dados dos servidores não foram carregados.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Mapear ID da unidade para siglas dos setores
+  const setorMapping = {
+    'main': ['COGESPA'],
+    'programacao': ['COPROG', 'COGESPA/COPROG'],
+    'execucao': ['COEX', 'COGESPA/COEX'],
+    'gestao': ['DPGDOC', 'DGPDOC/AROUCHE', 'DPGDOC/ARMENIA', 'DPGDOC/ARMÊNIA', 'DPGDOC/AROUCHE', 'DPGDOC/EFAPE', 'DPGDOC/NUPROE'],
+    'patrimonio': ['DPAT'],
+    'transportes': ['DTRAN/ARMENIA', 'DTRAN/ARMÊNIA'],
+    'zeladoria': ['DZEL', 'DZEL/ARMENIA', 'DZEL/EFAPE']
+  };
+
+  const setoresParaFiltrar = setorMapping[unitId] || [];
+
+  // Filtrar servidores por setor
+  const servidoresFiltrados = funcionariosData.filter(funcionario => {
+    const setorLimpo = funcionario.setor.trim().toUpperCase();
+    return setoresParaFiltrar.some(setor => setorLimpo.includes(setor.toUpperCase()));
+  });
+
+  if (servidoresFiltrados.length === 0) {
+    servidoresLista.innerHTML = `
+      <div class="coming-soon">
+        <div class="icon">👥</div>
+        <h3>Nenhum servidor encontrado</h3>
+        <p>Não há servidores cadastrados para esta unidade.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Ordenar por nome
+  servidoresFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+  // Gerar HTML da lista
+  const servidoresHtml = servidoresFiltrados.map(funcionario => `
+    <div class="servidor-item">
+      <div class="servidor-nome">${funcionario.nome}</div>
+      <div class="servidor-cargo">${funcionario.cargo}</div>
+      <div class="servidor-setor">${funcionario.setor}</div>
+    </div>
+  `).join('');
+
+  servidoresLista.innerHTML = `
+    <div class="servidores-count">
+      <strong>Total: ${servidoresFiltrados.length} servidor${servidoresFiltrados.length !== 1 ? 'es' : ''}</strong>
+    </div>
+    <div class="servidores-list">
+      ${servidoresHtml}
+    </div>
+  `;
+}
