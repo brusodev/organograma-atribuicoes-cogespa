@@ -1580,8 +1580,35 @@ function populateServidoresTab(unitId) {
     return;
   }
 
-  // Ordenar por nome
-  servidoresFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+  // Definir ordem hierárquica dos cargos
+  const ordemHierarquica = {
+    'COORDENADOR GERAL': 1,
+    'ASSESSOR ESPECIAL I': 2,
+    'COORDENADOR': 3,
+    'CHEFE DE DEPARTAMENTO': 4,
+    'CHEFE DE DIVISÃO': 5,
+    'ASSESSOR I': 6,
+    'ASSISTENTE TÉCNICO II': 7,
+    'ASSISTENTE TÉCNICO I': 8,
+    'ASSISTENTE IV': 9,
+    'ASSISTENTE III': 10,
+    'ASSISTENTE II': 11,
+    'EXECUTIVO PUBLICO': 12,    
+    'OFICIAL ADMINISTRATIVO': 13,
+    'PEB-II': 14,
+    'AUXILIAR DE SERVIÇOS GERAIS': 15
+  };
+
+  // Ordenar por hierarquia (cargo) e depois por nome alfabético
+  servidoresFiltrados.sort((a, b) => {
+    const ordemA = ordemHierarquica[a.cargo] || 999; // Cargos não mapeados vão para o final
+    const ordemB = ordemHierarquica[b.cargo] || 999;
+    
+    if (ordemA !== ordemB) {
+      return ordemA - ordemB; // Ordenar por hierarquia primeiro
+    }
+    return a.nome.localeCompare(b.nome); // Depois por nome alfabético
+  });
 
   // Gerar HTML da lista
   const servidoresHtml = servidoresFiltrados.map(funcionario => `

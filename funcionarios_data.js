@@ -32,8 +32,8 @@ const funcionariosData = [
   },
   {
     "nome": "RITA APARECIDA DA SILVA",
-    "cargo": "CHEFE DE DIVISÃO",
-    "setor": "DZEL"
+    "cargo": "",
+    "setor": "COPROG"
   },
   {
     "nome": "RONALDO MARTINS",
@@ -70,11 +70,7 @@ const funcionariosData = [
     "cargo": "OFICIAL ADMINISTRATIVO",
     "setor": "DPGDOC/AROUCHE"
   },
-  {
-    "nome": "CARLOS ALBERTO DA SILVA",
-    "cargo": "OFICIAL ADMINISTRATIVO",
-    "setor": "DPGDOC/ARMÊNIA"
-  },
+
   {
     "nome": "JUSSARA DE CAMARGO",
     "cargo": "AUXILIAR DE SERVIÇOS GERAIS",
@@ -88,11 +84,6 @@ const funcionariosData = [
   {
     "nome": "DIONE LUIZ DOS SANTOS",
     "cargo": "ASSISTENTE TÉCNICO I",
-    "setor": "DPGDOC/ARMÊNIA"
-  },
-  {
-    "nome": "DIONE LUIZ DOS SANTOS",
-    "cargo": "OFICIAL ADMINISTRATIVO",
     "setor": "DPGDOC/ARMÊNIA"
   },
   {
@@ -148,7 +139,7 @@ const funcionariosData = [
   {
     "nome": "RODRIGO TIAGO DE TOLEDO",
     "cargo": "EXECUTIVO PUBLICO",
-    "setor": "DZEL"
+    "setor": "DPGDOC/ARMÊNIA"
   },
   {
     "nome": "SHEILA DE OLIVEIRA COSTA",
@@ -171,19 +162,9 @@ const funcionariosData = [
     "setor": "DTRAN/ARMENIA"
   },
   {
-    "nome": "ALEXANDRE FERREIRA HILBERT -",
-    "cargo": "ASSISTENTE IV",
-    "setor": "DPAT"
-  },
-  {
     "nome": "MARIANA SILVA ADOLFO",
     "cargo": "ASSISTENTE TÉCNICO II",
     "setor": "DZEL"
-  },
-  {
-    "nome": "ELISANGELA ALVES DA SILVA",
-    "cargo": "ASSISTENTE TÉCNICO II",
-    "setor": "COGESPA/COPROG"
   },
   {
     "nome": "RAUL ESTEVES RODRIGUES BRANCO",
@@ -213,11 +194,11 @@ const funcionariosData = [
   {
     "nome": "JULIA NASCIMENTO TOMAS",
     "cargo": "ASSISTENTE III",
-    "setor": "COGESPA"
+    "setor": "COEX"
   },
   {
     "nome": "BRUNA CORDEIRO DA COSTA BARBOSA",
-    "cargo": "ASSISTENTE IV",
+    "cargo": "ASSISTENTE III",
     "setor": "DPAT"
   },
   {
@@ -228,7 +209,7 @@ const funcionariosData = [
   {
     "nome": "HEMARTESON LEMOS MUNIZ",
     "cargo": "ASSESSOR ESPECIAL I",
-    "setor": "COGESPA/COPROG"
+    "setor": "COGESPA"
   },
   {
     "nome": "ERICA ALEXANDRA GIMENES ALVES",
@@ -247,7 +228,7 @@ const funcionariosData = [
   },
   {
     "nome": "DANIELE IRACEMA DE AQUINO",
-    "cargo": "ASSISTENTE IV",
+    "cargo": "ASSISTENTE III",
     "setor": "DPAT"
   },
   {
@@ -278,7 +259,12 @@ const funcionariosData = [
   {
     "nome": "BEATRIZ MARTINS PERES",
     "cargo": "ASSISTENTE III",
-    "setor": "COGESPA/COPROG"
+    "setor": "COPROG"
+  },
+    {
+    "nome": "JAQUELINE SANTOS ZANCHETTA",
+    "cargo": "ASSISTENTE III",
+    "setor": "COPROG"
   },
   {
     "nome": "HENRIQUE ALVES CAMARGO",
@@ -292,7 +278,7 @@ const funcionariosData = [
   },
   {
     "nome": "DANIEL FERREIRA CHAGAS",
-    "cargo": "ASSISTENTE IV",
+    "cargo": "ASSISTENTE III",
     "setor": "DPAT"
   },
   {
@@ -303,17 +289,12 @@ const funcionariosData = [
   {
     "nome": "EVELLYN CRUZ TRINDADE",
     "cargo": "ASSISTENTE III",
-    "setor": "COGESPA/COEX"
+    "setor": "COPROG"
   },
   {
     "nome": "BRUNA ARAUJO DE ANDRADE",
     "cargo": "ASSISTENTE II",
     "setor": "DPGDOC/NUPROE"
-  },
-  {
-    "nome": "GABRIELY DA SILVA PACHECO",
-    "cargo": "ASSISTENTE III",
-    "setor": "COGESPA/COPROG"
   },
   {
     "nome": "ADRIANO DOS SANTOS CHAVES",
